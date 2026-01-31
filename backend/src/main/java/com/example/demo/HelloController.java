@@ -5,11 +5,12 @@ import com.example.demo.model.HelloResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Implements the OpenAPI-generated interface.
- */
+/** Implements the OpenAPI-generated interface. */
 @RestController
 public class HelloController implements HelloApi {
+  /** Default greeting returned by the API. */
+  private final String message;
+
   /**
    * Returns a hello message.
    *
@@ -17,8 +18,13 @@ public class HelloController implements HelloApi {
    */
   @Override
   public ResponseEntity<HelloResponse> getHello() {
-    HelloResponse response = new HelloResponse();
-    response.setMessage("Hello from Spring Boot");
+    final HelloResponse response = new HelloResponse();
+    response.setMessage(message);
     return ResponseEntity.ok(response);
+  }
+
+  /** Default constructor. */
+  public HelloController() {
+    this.message = "Hello from Spring Boot";
   }
 }

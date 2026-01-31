@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
-<!-- SpotBugs exclusions; keep empty for now. -->
+<!-- SpotBugs exclusions for OpenAPI-generated code. -->
 <FindBugsFilter>
+    <Match>
+        <Class name="~com\\.example\\.demo\\.(api|model|invoker)\\..*"/>
+    </Match>
 </FindBugsFilter>

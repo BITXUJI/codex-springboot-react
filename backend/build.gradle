@@ -81,7 +81,36 @@ spotbugs {
     excludeFilter = file("$rootDir/config/spotbugs/excludeFilter.xml")
 }
 
+def openApiGeneratedPaths = [
+    "**/build/generated/**"
+]
+
+def openApiGeneratedPackages = [
+    "**/com/example/demo/api/**",
+    "**/com/example/demo/model/**",
+    "**/com/example/demo/invoker/**"
+]
+
+tasks.withType(Checkstyle).configureEach {
+    source = fileTree("src/main/java")
+}
+
+tasks.withType(Pmd).configureEach {
+    source = fileTree("src/main/java")
+}
+
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    if (name.toLowerCase().contains("test")) {
+        dependsOn tasks.compileTestJava
+        classes = files(sourceSets.test.output.classesDirs)
+        auxClassPaths = sourceSets.test.runtimeClasspath
+    } else {
+        dependsOn tasks.compileJava
+        classes = files(sourceSets.main.output.classesDirs)
+    }
+    classes = files(classes.files.collect { file ->
+        fileTree(dir: file, exclude: openApiGeneratedPackages)
+    })
     reports {
         html.required = true
         xml.required = true
@@ -109,10 +138,16 @@ jacocoTestReport {
         xml.required = true
         html.required = true
     }
+    classDirectories.setFrom(files(classDirectories.files.collect { file ->
+        fileTree(dir: file, exclude: openApiGeneratedPackages)
+    }))
 }
 
 jacocoTestCoverageVerification {
     dependsOn tasks.test
+    classDirectories.setFrom(files(classDirectories.files.collect { file ->
+        fileTree(dir: file, exclude: openApiGeneratedPackages)
+    }))
     violationRules {
         rule {
             limit {
