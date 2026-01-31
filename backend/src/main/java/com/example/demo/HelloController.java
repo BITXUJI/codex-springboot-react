@@ -10,10 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class HelloController implements HelloApi {
-    @Override
-    public ResponseEntity<HelloResponse> getHello() {
-        HelloResponse response = new HelloResponse();
-        response.setMessage("Hello from Spring Boot");
-        return ResponseEntity.ok(response);
-    }
+  /**
+   * Returns a hello message.
+   *
+   * @return the hello response payload
+   */
+  @Override
+  public ResponseEntity<HelloResponse> getHello() {
+    HelloResponse response = new HelloResponse();
+    response.setMessage("Hello from Spring Boot");
+    return ResponseEntity.ok(response);
+  }
 }

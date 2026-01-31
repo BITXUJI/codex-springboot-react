@@ -8,6 +8,11 @@ coverage/
 
 # Vite
 .vite/
+frontend/vite.config.d.ts
+frontend/vite.config.js
+
+# TypeScript
+*.tsbuildinfo
 
 # Gradle
 .gradle/

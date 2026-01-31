@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.6'
-    id 'com.github.spotbugs' version '6.4.8'
+    id 'com.github.spotbugs' version '6.4.5'
     id 'pmd'
     id 'checkstyle'
     id 'jacoco'
@@ -26,8 +26,10 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-test'
 }
 
 tasks.withType(Test).configureEach {
@@ -74,8 +76,8 @@ pmd {
 }
 
 spotbugs {
-    effort = com.github.spotbugs.snom.Effort.MAX
-    reportLevel = com.github.spotbugs.snom.Confidence.LOW
+    effort = 'max'
+    reportLevel = 'low'
     excludeFilter = file("$rootDir/config/spotbugs/excludeFilter.xml")
 }
 
