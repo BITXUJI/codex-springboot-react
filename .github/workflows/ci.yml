@@ -69,5 +69,4 @@ jobs:
       - name: Dependency Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-          GRADLE_OPTS: -Xms512m -Xmx2048m -XX:MaxMetaspaceSize=512m
         run: ./gradlew dependencyCheckAnalyze
