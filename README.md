@@ -34,6 +34,12 @@ npm run dev
 - Backend: `openApiGenerate` runs during `build` to generate interfaces/models from `openapi/api.yml`.
 - Frontend: `npm run generate` uses `openapi-typescript` to generate a typed client.
 
+## Formatting
+- VS Code is configured for format-on-save via `.vscode/settings.json` and the devcontainer settings.
+- Java formatting uses `backend/config/formatter/formatter.xml` (Google style) and is aligned with Checkstyle.
+- Frontend formatting uses Prettier with `frontend/.prettierrc.json`.
+- OpenAPI-generated code is excluded from formatting and quality checks; keep edits in non-generated files.
+
 ## Local dev flow
 1. Start the backend: `./gradlew bootRun` (port 8080).
 2. Start the frontend: `npm run dev` (port 5173).
