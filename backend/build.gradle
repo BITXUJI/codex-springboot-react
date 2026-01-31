@@ -34,6 +34,13 @@ dependencies {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "failed", "skipped"
+        showCauses true
+        showExceptions true
+        showStandardStreams false
+        showStackTraces true
+    }
 }
 
 // Generate API interfaces and models from OpenAPI.
@@ -76,8 +83,8 @@ pmd {
 }
 
 spotbugs {
-    effort = 'max'
-    reportLevel = 'low'
+    effort = com.github.spotbugs.snom.Effort.valueOf('MAX')
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
     excludeFilter = file("$rootDir/config/spotbugs/excludeFilter.xml")
 }
 
@@ -92,11 +99,25 @@ def openApiGeneratedPackages = [
 ]
 
 tasks.withType(Checkstyle).configureEach {
-    source = fileTree("src/main/java")
+    if (name.toLowerCase().contains("test")) {
+        source = fileTree("src/test/java")
+    } else {
+        source = fileTree("src/main/java")
+    }
 }
 
 tasks.withType(Pmd).configureEach {
     source = fileTree("src/main/java")
+}
+
+tasks.withType(Javadoc).configureEach {
+    source = sourceSets.main.allJava
+    exclude openApiGeneratedPaths
+    exclude openApiGeneratedPackages
+    failOnError = true
+    options.addBooleanOption('Werror', true)
+    options.addBooleanOption('Xdoclint:all', true)
+    options.addBooleanOption('private', true)
 }
 
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {

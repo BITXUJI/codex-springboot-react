@@ -15,15 +15,22 @@ import org.springframework.web.context.WebApplicationContext;
 /** Verifies the hello endpoint returns a message. */
 @SpringBootTest
 class HelloControllerTest {
+  /** Spring web application context used to configure MockMvc. */
   @Autowired private WebApplicationContext applicationContext;
 
   private MockMvc mockMvc;
 
+  /** Builds MockMvc before each test. */
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
   }
 
+  /**
+   * Ensures the hello endpoint returns the expected payload.
+   *
+   * @throws Exception when the request fails
+   */
   @Test
   void returnsHelloMessage() throws Exception {
     mockMvc

@@ -6,7 +6,9 @@ import java.lang.reflect.Constructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 
+/** Tests for {@link DemoApplication}. */
 class DemoApplicationTest {
+  /** Verifies the application context starts and stops. */
   @Test
   void runStartsAndStopsContext() {
     try (ConfigurableApplicationContext context =
@@ -15,6 +17,7 @@ class DemoApplicationTest {
     }
   }
 
+  /** Verifies main closes the context when the exit flag is enabled. */
   @Test
   void mainClosesWhenFlagEnabled() {
     System.setProperty("app.exitOnStart", "true");
@@ -25,6 +28,7 @@ class DemoApplicationTest {
     }
   }
 
+  /** Verifies main keeps the context when the exit flag is disabled. */
   @Test
   void mainKeepsContextWhenFlagDisabled() {
     DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
@@ -34,6 +38,11 @@ class DemoApplicationTest {
     }
   }
 
+  /**
+   * Verifies the private constructor can be invoked via reflection.
+   *
+   * @throws ReflectiveOperationException when reflection fails
+   */
   @Test
   void constructorIsCovered() throws ReflectiveOperationException {
     Constructor<DemoApplication> constructor = DemoApplication.class.getDeclaredConstructor();
