@@ -19,3 +19,8 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - CycloneDX SBOM: `./gradlew cyclonedxBom` or `./gradlew securityReport`
 - Reports live under `backend/build/reports`
 - Set `NVD_API_KEY` (from the NVD API key portal) in CI/local env for faster Dependency-Check scans.
+
+## Release publishing
+- Tag `v*` to trigger the release workflow.
+- Frontend release asset: `frontend-dist.zip`.
+- Backend publishes to GitHub Packages (Maven) via `./gradlew publish`.

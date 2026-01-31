@@ -46,6 +46,12 @@ npm run dev
 - Combined security report task: `./gradlew securityReport`.
 - For faster Dependency-Check scans, set `NVD_API_KEY` (from the NVD API key portal) as an environment variable.
 
+## Release publishing
+- Tag a release (e.g. `v1.0.0`) to trigger `.github/workflows/release.yml`.
+- Frontend: builds `frontend/dist` and uploads `frontend-dist.zip` to the GitHub Release.
+- Backend: publishes the Spring Boot jar to GitHub Packages (Maven).
+- GitHub Packages URL: `https://maven.pkg.github.com/BITXUJI/codex-springboot-react`
+
 ## Local dev flow
 1. Start the backend: `./gradlew bootRun` (port 8080).
 2. Start the frontend: `npm run dev` (port 5173).

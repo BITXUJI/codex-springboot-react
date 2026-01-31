@@ -10,6 +10,7 @@ plugins {
     id 'pmd'
     id 'checkstyle'
     id 'jacoco'
+    id 'maven-publish'
     id 'com.diffplug.spotless' version '6.25.0'
     id 'org.openapi.generator' version '7.7.0'
 }
@@ -227,4 +228,25 @@ tasks.register('securityReport') {
     group = 'verification'
     description = 'Runs dependency vulnerability scan and generates a CycloneDX SBOM.'
     dependsOn 'dependencyCheckAnalyze', 'cyclonedxBom'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact tasks.named('bootJar')
+            groupId = group
+            artifactId = 'codex-backend'
+            version = version
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri("https://maven.pkg.github.com/${System.getenv('GITHUB_REPOSITORY') ?: 'BITXUJI/codex-springboot-react'}")
+            credentials {
+                username = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user') ?: ''
+                password = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key') ?: ''
+            }
+        }
+    }
 }
