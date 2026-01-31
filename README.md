@@ -49,8 +49,11 @@ npm run dev
 ## Release publishing
 - Tag a release (e.g. `v1.0.0`) to trigger `.github/workflows/release.yml`.
 - Frontend: builds `frontend/dist` and uploads `frontend-dist.zip` to the GitHub Release.
-- Backend: publishes the Spring Boot jar to GitHub Packages (Maven).
+- Backend: publishes the Spring Boot jar to GitHub Packages (Maven); version is derived from the tag.
 - GitHub Packages URL: `https://maven.pkg.github.com/BITXUJI/codex-springboot-react`
+- Example tag commands:
+  - `git tag -a v1.0.0 -m "release v1.0.0"`
+  - `git push origin v1.0.0`
 
 ## Local dev flow
 1. Start the backend: `./gradlew bootRun` (port 8080).
