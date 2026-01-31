@@ -12,3 +12,8 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 ## Checks (before sharing changes)
 - Backend: `./gradlew javadoc` and `./gradlew build`
 - Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`
+
+## Security tooling
+- Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze`
+- CycloneDX SBOM: `./gradlew cyclonedxBom` or `./gradlew securityReport`
+- Reports live under `backend/build/reports`

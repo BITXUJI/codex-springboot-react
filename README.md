@@ -40,6 +40,11 @@ npm run dev
 - Frontend formatting uses Prettier with `frontend/.prettierrc.json`.
 - OpenAPI-generated code is excluded from formatting and quality checks; keep edits in non-generated files.
 
+## Security and SBOM
+- Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze` (reports in `backend/build/reports/dependency-check`).
+- CycloneDX SBOM: `./gradlew cyclonedxBom` (output in `backend/build/reports`).
+- Combined security report task: `./gradlew securityReport`.
+
 ## Local dev flow
 1. Start the backend: `./gradlew bootRun` (port 8080).
 2. Start the frontend: `npm run dev` (port 5173).
