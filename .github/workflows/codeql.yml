@@ -19,7 +19,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["java-kotlin", "javascript-typescript"]
+        include:
+          - language: "java-kotlin"
+            build-mode: "manual"
+          - language: "javascript-typescript"
+            build-mode: "none"
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -27,6 +31,7 @@ jobs:
         uses: github/codeql-action/init@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4.32.0
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
       - name: Setup Java
         if: matrix.language == 'java-kotlin'
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
