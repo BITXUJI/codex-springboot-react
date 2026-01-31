@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  act:ci:
+    desc: Run CI workflow locally with act
+    cmds:
+      - act -W .github/workflows/ci.yml
+
+  act:codeql:
+    desc: Run CodeQL workflow locally with act
+    cmds:
+      - act -W .github/workflows/codeql.yml
+
+  act:release:
+    desc: Run Release workflow locally with act
+    cmds:
+      - act -W .github/workflows/release.yml

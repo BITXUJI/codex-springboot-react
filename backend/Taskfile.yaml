@@ -1,0 +1,47 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Clean and build the backend with all checks
+    cmds:
+      - ./gradlew clean build
+
+  test:
+    desc: Run backend tests
+    cmds:
+      - ./gradlew test
+
+  javadoc:
+    desc: Generate Javadoc (warnings treated as errors)
+    cmds:
+      - ./gradlew javadoc
+
+  check:
+    desc: Run quality checks (Spotless, PMD, Checkstyle, SpotBugs, JaCoCo)
+    cmds:
+      - ./gradlew check
+
+  boot:
+    desc: Run the Spring Boot app
+    cmds:
+      - ./gradlew bootRun
+
+  dependency-check:
+    desc: Run OWASP Dependency-Check scan
+    cmds:
+      - ./gradlew dependencyCheckAnalyze
+
+  security-report:
+    desc: Run dependency scan + CycloneDX SBOM
+    cmds:
+      - ./gradlew securityReport
+
+  publish:
+    desc: Publish the backend artifact to GitHub Packages
+    cmds:
+      - ./gradlew publish
+
+  format:
+    desc: Apply formatting (Spotless)
+    cmds:
+      - ./gradlew spotlessApply
