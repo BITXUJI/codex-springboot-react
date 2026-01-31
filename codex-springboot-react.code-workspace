@@ -1,0 +1,14 @@
+{
+  "folders": [
+    { "path": "frontend" },
+    { "path": "backend" },
+    { "path": "openapi" }
+  ],
+  "settings": {
+    "files.eol": "\n",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  }
+}

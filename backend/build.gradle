@@ -1,0 +1,132 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.2'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.github.spotbugs' version '6.4.8'
+    id 'pmd'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'org.openapi.generator' version '7.7.0'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+// Generate API interfaces and models from OpenAPI.
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "$rootDir/../openapi/api.yml"
+    outputDir = "$buildDir/generated"
+    apiPackage = 'com.example.demo.api'
+    modelPackage = 'com.example.demo.model'
+    invokerPackage = 'com.example.demo.invoker'
+    configOptions = [
+        interfaceOnly: 'true',
+        useSpringBoot3: 'true',
+        useTags: 'true',
+        performBeanValidation: 'true'
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+compileJava {
+    dependsOn tasks.openApiGenerate
+}
+
+checkstyle {
+    toolVersion = '12.3.0'
+    configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+}
+
+pmd {
+    toolVersion = '7.17.0'
+    ruleSets = []
+    ruleSetFiles = files("$rootDir/config/pmd/pmd.xml")
+}
+
+spotbugs {
+    effort = com.github.spotbugs.snom.Effort.MAX
+    reportLevel = com.github.spotbugs.snom.Confidence.LOW
+    excludeFilter = file("$rootDir/config/spotbugs/excludeFilter.xml")
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat('1.17.0')
+        target('src/**/*.java')
+    }
+}
+
+jacoco {
+    toolVersion = '0.8.14'
+}
+
+tasks.named('test') {
+    finalizedBy tasks.jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn tasks.test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn tasks.test
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 1.0
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 1.0
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'spotlessCheck', 'pmdMain', 'checkstyleMain', 'spotbugsMain', 'jacocoTestCoverageVerification'
+}

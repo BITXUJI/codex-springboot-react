@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Codex Demo API
+  version: 1.0.0
+  description: A minimal OpenAPI definition used to generate server and client code.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/hello:
+    get:
+      tags:
+        - hello
+      summary: Say hello
+      operationId: getHello
+      responses:
+        '200':
+          description: A hello message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelloResponse'
+components:
+  schemas:
+    HelloResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Hello from Spring Boot
