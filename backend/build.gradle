@@ -3,6 +3,10 @@ plugins {
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.github.spotbugs' version '6.4.5'
+    id 'org.owasp.dependencycheck' version '12.2.0'
+    id 'org.cyclonedx.bom' version '3.1.0'
+    id 'com.autonomousapps.dependency-analysis' version '3.5.1'
+    id 'com.github.ben-manes.versions' version '0.53.0'
     id 'pmd'
     id 'checkstyle'
     id 'jacoco'
@@ -187,4 +191,20 @@ jacocoTestCoverageVerification {
 
 tasks.named('check') {
     dependsOn 'spotlessCheck', 'pmdMain', 'checkstyleMain', 'spotbugsMain', 'jacocoTestCoverageVerification'
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 0
+    formats = ['HTML', 'JSON']
+    suppressionFile = "$rootDir/config/dependency-check/suppressions.xml"
+    analyzers {
+        assemblyEnabled = false
+        nodeAuditEnabled = false
+    }
+}
+
+tasks.register('securityReport') {
+    group = 'verification'
+    description = 'Runs dependency vulnerability scan and generates a CycloneDX SBOM.'
+    dependsOn 'dependencyCheckAnalyze', 'cyclonedxBom'
 }
