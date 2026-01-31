@@ -44,6 +44,7 @@ npm run dev
 - Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze` (reports in `backend/build/reports/dependency-check`).
 - CycloneDX SBOM: `./gradlew cyclonedxBom` (output in `backend/build/reports`).
 - Combined security report task: `./gradlew securityReport`.
+- For faster Dependency-Check scans, set `NVD_API_KEY` (from the NVD API key portal) as an environment variable.
 
 ## Local dev flow
 1. Start the backend: `./gradlew bootRun` (port 8080).

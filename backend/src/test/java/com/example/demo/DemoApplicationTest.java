@@ -2,18 +2,25 @@ package com.example.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.lang.reflect.Constructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /** Tests for {@link DemoApplication}. */
 class DemoApplicationTest {
+  /** Label used to annotate assertions. */
+  private final String caseName;
+
+  /** Creates the test instance. */
+  public DemoApplicationTest() {
+    caseName = "default";
+  }
+
   /** Verifies the application context starts and stops. */
   @Test
   void runStartsAndStopsContext() {
     try (ConfigurableApplicationContext context =
-        DemoApplication.run(new String[] {"--spring.main.web-application-type=none"})) {
-      assertThat(context.isActive()).isTrue();
+        DemoApplication.run("--spring.main.web-application-type=none")) {
+      assertThat(context.isActive()).as(caseName).isTrue();
     }
   }
 
@@ -23,6 +30,7 @@ class DemoApplicationTest {
     System.setProperty("app.exitOnStart", "true");
     try {
       DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
+      assertThat(DemoApplication.getLastContext()).as(caseName).isNotNull();
     } finally {
       System.clearProperty("app.exitOnStart");
     }
@@ -32,22 +40,16 @@ class DemoApplicationTest {
   @Test
   void mainKeepsContextWhenFlagDisabled() {
     DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
-    ConfigurableApplicationContext context = DemoApplication.getLastContext();
-    if (context != null) {
-      context.close();
+    try (ConfigurableApplicationContext context = DemoApplication.getLastContext()) {
+      assertThat(context).as(caseName).isNotNull();
+      context.getId();
     }
   }
 
-  /**
-   * Verifies the private constructor can be invoked via reflection.
-   *
-   * @throws ReflectiveOperationException when reflection fails
-   */
+  /** Verifies the private constructor can be invoked via the test helper. */
   @Test
-  void constructorIsCovered() throws ReflectiveOperationException {
-    Constructor<DemoApplication> constructor = DemoApplication.class.getDeclaredConstructor();
-    constructor.setAccessible(true);
-    DemoApplication instance = constructor.newInstance();
-    assertThat(instance).isNotNull();
+  void constructorIsCovered() {
+    final DemoApplication instance = DemoApplication.createForTest();
+    assertThat(instance.instanceMarker()).as(caseName).isEqualTo("instance");
   }
 }

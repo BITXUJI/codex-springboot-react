@@ -18,3 +18,4 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze`
 - CycloneDX SBOM: `./gradlew cyclonedxBom` or `./gradlew securityReport`
 - Reports live under `backend/build/reports`
+- Set `NVD_API_KEY` (from the NVD API key portal) in CI/local env for faster Dependency-Check scans.

@@ -111,7 +111,11 @@ tasks.withType(Checkstyle).configureEach {
 }
 
 tasks.withType(Pmd).configureEach {
-    source = fileTree("src/main/java")
+    if (name.toLowerCase().contains("test")) {
+        source = fileTree("src/test/java")
+    } else {
+        source = fileTree("src/main/java")
+    }
 }
 
 tasks.withType(Javadoc).configureEach {
@@ -190,13 +194,29 @@ jacocoTestCoverageVerification {
 }
 
 tasks.named('check') {
-    dependsOn 'spotlessCheck', 'pmdMain', 'checkstyleMain', 'spotbugsMain', 'jacocoTestCoverageVerification'
+    dependsOn 'spotlessCheck',
+        'pmdMain',
+        'pmdTest',
+        'checkstyleMain',
+        'checkstyleTest',
+        'spotbugsMain',
+        'spotbugsTest',
+        'jacocoTestCoverageVerification'
 }
 
 dependencyCheck {
     failBuildOnCVSS = 0
     formats = ['HTML', 'JSON']
     suppressionFile = "$rootDir/config/dependency-check/suppressions.xml"
+    def configuredKey = System.getenv('NVD_API_KEY')
+    if (configuredKey == null || configuredKey.trim().isEmpty()) {
+        configuredKey = findProperty('dependencyCheckNvdApiKey')
+    }
+    if (configuredKey != null && !configuredKey.toString().trim().isEmpty()) {
+        nvd {
+            apiKey = configuredKey.toString().trim()
+        }
+    }
     analyzers {
         assemblyEnabled = false
         nodeAuditEnabled = false

@@ -67,4 +67,6 @@ jobs:
       - name: Build
         run: ./gradlew build
       - name: Dependency Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./gradlew dependencyCheckAnalyze

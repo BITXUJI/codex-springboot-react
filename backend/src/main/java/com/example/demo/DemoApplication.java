@@ -39,6 +39,15 @@ public final class DemoApplication {
   }
 
   /**
+   * Creates a new application instance for test coverage.
+   *
+   * @return new application instance
+   */
+  /* default */ static DemoApplication createForTest() {
+    return new DemoApplication();
+  }
+
+  /**
    * Returns the most recently started application context.
    *
    * @return last started application context, or null if none
@@ -48,5 +57,16 @@ public final class DemoApplication {
   }
 
   /** Prevent instantiation of the application class. */
-  private DemoApplication() {}
+  private DemoApplication() {
+    // Intentionally empty.
+  }
+
+  /**
+   * Returns a marker string for instance access.
+   *
+   * @return marker string
+   */
+  /* default */ String instanceMarker() {
+    return "instance";
+  }
 }
