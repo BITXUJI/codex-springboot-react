@@ -26,6 +26,11 @@ tasks:
     cmds:
       - npm test
 
+  test:coverage:
+    desc: Run frontend tests with coverage
+    cmds:
+      - npm test -- --coverage
+
   generate:
     desc: Generate API client from OpenAPI
     cmds:

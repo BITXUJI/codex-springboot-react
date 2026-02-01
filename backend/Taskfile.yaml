@@ -16,6 +16,11 @@ tasks:
     cmds:
       - ./gradlew javadoc
 
+  javadoc:debug:
+    desc: Generate Javadoc with full warnings and rerun tasks
+    cmds:
+      - ./gradlew javadoc --warning-mode all --rerun-tasks
+
   check:
     desc: Run quality checks (Spotless, PMD, Checkstyle, SpotBugs, JaCoCo)
     cmds:
@@ -45,3 +50,13 @@ tasks:
     desc: Apply formatting (Spotless)
     cmds:
       - ./gradlew spotlessApply
+
+  build:debug:
+    desc: Build with full warnings and rerun tasks
+    cmds:
+      - ./gradlew build --warning-mode all --rerun-tasks
+
+  test:debug:
+    desc: Run tests with full warnings and rerun tasks
+    cmds:
+      - ./gradlew test --warning-mode all --rerun-tasks

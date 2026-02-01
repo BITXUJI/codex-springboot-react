@@ -10,7 +10,7 @@ This repo contains a minimal Spring Boot + React (Vite + TypeScript) setup with 
 ## Prerequisites
 - Java 21+
 - Gradle (local install is OK)
-- Node 18+ and npm
+- Node 22+ and npm
 
 ## Backend
 ```bash
@@ -40,6 +40,9 @@ npm run dev
 - Frontend formatting uses Prettier with `frontend/.prettierrc.json`.
 - OpenAPI-generated code is excluded from formatting and quality checks; keep edits in non-generated files.
 
+## Code style note
+- Prefer Lombok annotations to avoid hand-written Java boilerplate (constructors, getters/setters, builders).
+
 ## Security and SBOM
 - Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze` (reports in `backend/build/reports/dependency-check`).
 - CycloneDX SBOM: `./gradlew cyclonedxBom` (output in `backend/build/reports`).
@@ -59,3 +62,17 @@ npm run dev
 1. Start the backend: `./gradlew bootRun` (port 8080).
 2. Start the frontend: `npm run dev` (port 5173).
 3. Open the app; it calls `GET /api/hello` and renders the response.
+
+## Debug and troubleshooting commands
+- Backend build with full warnings: `cd backend && task build:debug`
+- Backend Javadoc with full warnings: `cd backend && task javadoc:debug`
+- Backend tests with full warnings: `cd backend && task test:debug`
+- Frontend tests with coverage: `cd frontend && task test:coverage`
+- CI workflows locally: `act -W .github/workflows/ci.yml`
+
+## Common Git commands
+- Check status: `git status -sb`
+- View staged diff: `git diff --staged`
+- View working tree diff: `git diff`
+- Commit: `git commit -m "message"`
+- Push: `git push`

@@ -32,19 +32,24 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-test'
+    testCompileOnly 'org.projectlombok:lombok:1.18.42'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
 }
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    jvmArgs '-Xshare:off'
     testLogging {
         events "passed", "failed", "skipped"
-        showCauses true
-        showExceptions true
-        showStandardStreams false
-        showStackTraces true
+        showCauses = true
+        showExceptions = true
+        showStandardStreams = false
+        showStackTraces = true
     }
 }
 
@@ -137,7 +142,9 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
     } else {
         dependsOn tasks.compileJava
         classes = files(sourceSets.main.output.classesDirs)
+        auxClassPaths = files(sourceSets.main.compileClasspath, sourceSets.main.output.classesDirs)
     }
+    jvmArgs.add('-Xshare:off')
     classes = files(classes.files.collect { file ->
         fileTree(dir: file, exclude: openApiGeneratedPackages)
     })
@@ -222,6 +229,10 @@ dependencyCheck {
         assemblyEnabled = false
         nodeAuditEnabled = false
     }
+}
+
+tasks.withType(org.cyclonedx.gradle.BaseCyclonedxTask).configureEach {
+    schemaVersion = org.cyclonedx.Version.VERSION_15
 }
 
 tasks.register('securityReport') {
