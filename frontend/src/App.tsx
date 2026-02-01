@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchHello } from './api/helloClient';
+import { ApiError, fetchHello } from './api/helloClient';
 
 // Displays a message fetched from the Spring Boot API.
 export default function App() {
@@ -9,7 +9,17 @@ export default function App() {
   useEffect(() => {
     fetchHello()
       .then((data) => setMessage(data.message))
-      .catch((err: Error) => setError(err.message));
+      .catch((err: unknown) => {
+        if (err instanceof ApiError) {
+          setError(err.message);
+          return;
+        }
+        if (err instanceof Error) {
+          setError(err.message);
+          return;
+        }
+        setError('Unexpected error');
+      });
   }, []);
 
   return (

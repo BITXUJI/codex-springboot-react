@@ -19,6 +19,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HelloResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     HelloResponse:
@@ -29,3 +35,54 @@ components:
         message:
           type: string
           example: Hello from Spring Boot
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+        - path
+      properties:
+        code:
+          type: string
+          example: INTERNAL_ERROR
+        message:
+          type: string
+          example: Unexpected error
+        traceId:
+          type: string
+          example: 2b6b8b22-9b31-4c96-8a22-f6a2d2e4c1c4
+        details:
+          $ref: '#/components/schemas/ErrorDetails'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-02-01T12:34:56Z
+        path:
+          type: string
+          example: /api/hello
+    ErrorDetails:
+      type: object
+      additionalProperties: true
+      properties:
+        fieldErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+    FieldError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          example: name
+        message:
+          type: string
+          example: must not be blank
+        rejectedValue:
+          type: string
+          nullable: true
+          example: ""

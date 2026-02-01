@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 import * as api from './api/helloClient';
+import { ApiError } from './api/helloClient';
 
 describe('App', () => {
   let fetchHelloSpy: jest.SpyInstance;
@@ -21,8 +22,12 @@ describe('App', () => {
   });
 
   it('renders the error message when the request fails', async () => {
-    fetchHelloSpy.mockRejectedValueOnce(new Error('Request failed: 500'));
+    fetchHelloSpy.mockRejectedValueOnce(
+      new ApiError('Network error. Please check your connection.'),
+    );
     render(<App />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Request failed: 500');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Network error. Please check your connection.',
+    );
   });
 });
