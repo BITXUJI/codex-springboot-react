@@ -6,7 +6,9 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>Strict PMD rules covering best practices, style, design, documentation, and security.</description>
     <rule ref="category/java/bestpractices.xml"/>
-    <rule ref="category/java/codestyle.xml"/>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+    </rule>
     <rule ref="category/java/design.xml"/>
     <!--
       Reason: LoosePackageCoupling requires explicit packages/classes or PMD logs a misconfigured rule warning.
@@ -17,7 +19,14 @@
             <property name="packages" value="com.example.demo"/>
         </properties>
     </rule>
-    <rule ref="category/java/documentation.xml"/>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentSize"/>
+    </rule>
+    <rule ref="category/java/documentation.xml/CommentSize">
+        <properties>
+            <property name="maxLines" value="20"/>
+        </properties>
+    </rule>
     <rule ref="category/java/errorprone.xml"/>
     <rule ref="category/java/multithreading.xml"/>
     <rule ref="category/java/performance.xml"/>

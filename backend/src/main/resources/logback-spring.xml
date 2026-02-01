@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="backend/logs"/>
+
+  <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+    </encoder>
+  </appender>
+
+  <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/app.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>
+      <maxHistory>60</maxHistory>
+      <totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>NEUTRAL</onMismatch>
+    </filter>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+    </encoder>
+  </appender>
+
+  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/error.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>
+      <maxHistory>60</maxHistory>
+      <totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+    </encoder>
+  </appender>
+
+  <appender name="ACCESS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/access.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/access.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>
+      <maxHistory>60</maxHistory>
+      <totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+    </encoder>
+  </appender>
+
+  <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/sql.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/sql.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>
+      <maxHistory>60</maxHistory>
+      <totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+    </encoder>
+  </appender>
+
+  <logger name="ACCESS_LOG" level="INFO" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="ACCESS_FILE"/>
+  </logger>
+
+  <logger name="org.mybatis" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="org.apache.ibatis" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.sqlonly" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.sqltiming" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.audit" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.resultset" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.resultsettable" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+  <logger name="jdbc.connection" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="SQL_FILE"/>
+  </logger>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE_JSON"/>
+    <appender-ref ref="APP_FILE"/>
+    <appender-ref ref="ERROR_FILE"/>
+  </root>
+</configuration>
