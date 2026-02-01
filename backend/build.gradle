@@ -213,6 +213,10 @@ tasks.named('check') {
         'jacocoTestCoverageVerification'
 }
 
+tasks.named('build') {
+    dependsOn 'spotlessCheck'
+}
+
 dependencyCheck {
     failBuildOnCVSS = 0
     formats = ['HTML', 'JSON']

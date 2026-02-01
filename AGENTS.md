@@ -17,7 +17,8 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - Keep generated code isolated and reproducible.
 - Do not hand-edit OpenAPI-generated code; keep manual changes in non-generated sources.
 - OpenAPI-generated code is excluded from formatting and quality checks.
-- Format-on-save is enabled: Java uses `backend/config/formatter/formatter.xml` (Google style), frontend uses `frontend/.prettierrc.json`.
+- Java formatting uses `backend/config/formatter/formatter.xml`; after Java changes, run `./gradlew spotlessApply`.
+- Frontend formatting uses `frontend/.prettierrc.json`.
 - For dependency versions and CI/CD action versions, always verify online that the version is current, available, and compatible before updating.
 
 ## Checks (before sharing changes)
