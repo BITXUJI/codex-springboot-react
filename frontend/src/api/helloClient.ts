@@ -1,19 +1,34 @@
 import type { components } from './generated';
 
+/** Error payload returned by the backend. */
 type ErrorResponse = components['schemas']['ErrorResponse'];
+/** Success payload returned by the backend. */
 type HelloResponse = components['schemas']['HelloResponse'];
 
-// Calls the backend hello endpoint defined in OpenAPI.
+/** Default request timeout in milliseconds. */
 const DEFAULT_TIMEOUT_MS = 8000;
+/** Trace header used for request correlation. */
 const TRACE_ID_HEADER = 'X-Request-Id';
 
+/** API error raised by the client helpers. */
 export class ApiError extends Error {
+  /** Error code associated with the failure. */
   code?: string;
+  /** Structured error details, when available. */
   details?: ErrorResponse['details'];
+  /** HTTP status for the failure. */
   status?: number;
+  /** Trace id attached to the response or generated locally. */
   traceId?: string;
+  /** Indicates a timeout failure. */
   isTimeout = false;
 
+  /**
+   * Creates a typed API error.
+   *
+   * @param message error message
+   * @param options extra error metadata
+   */
   constructor(message: string, options: Partial<ApiError> = {}) {
     super(message);
     this.name = 'ApiError';
@@ -21,10 +36,22 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Detects abort-related errors from fetch.
+ *
+ * @param error unknown error value
+ * @returns true when the error represents an abort
+ */
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
+/**
+ * Validates the error response shape.
+ *
+ * @param payload parsed JSON payload
+ * @returns true when the payload is a valid error response
+ */
 function isErrorResponse(payload: unknown): payload is ErrorResponse {
   if (!payload || typeof payload !== 'object') {
     return false;
@@ -39,6 +66,14 @@ function isErrorResponse(payload: unknown): payload is ErrorResponse {
   );
 }
 
+/**
+ * Builds an ApiError from a non-2xx response.
+ *
+ * @param status HTTP status code
+ * @param payload parsed response payload
+ * @param traceId trace id from headers
+ * @returns ApiError instance
+ */
 function buildErrorFromResponse(
   status: number,
   payload: unknown,
@@ -59,6 +94,12 @@ function buildErrorFromResponse(
   });
 }
 
+/**
+ * Loads the hello message from the backend.
+ *
+ * @param options request options
+ * @returns hello response payload
+ */
 export async function fetchHello(
   options: { timeoutMs?: number } = {},
 ): Promise<HelloResponse> {

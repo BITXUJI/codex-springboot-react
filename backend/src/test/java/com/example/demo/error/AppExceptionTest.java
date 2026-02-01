@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 /** Tests for {@link AppException}. */
-@SuppressWarnings("PMD.LawOfDemeter")
 class AppExceptionTest {
     /**
      * Constructor keeps null details.

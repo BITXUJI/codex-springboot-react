@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ApiError, fetchHello } from './api/helloClient';
 
-// Displays a message fetched from the Spring Boot API.
+/** Renders the hello message returned by the API. */
 export default function App() {
+  /** Hello message displayed in the UI. */
   const [message, setMessage] = useState('Loading...');
+  /** Error message displayed when the request fails. */
   const [error, setError] = useState('');
 
+  /** Loads the hello message on mount. */
   useEffect(() => {
     fetchHello()
       .then((data) => setMessage(data.message))

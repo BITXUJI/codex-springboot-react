@@ -120,8 +120,10 @@ tasks.withType(Checkstyle).configureEach {
 tasks.withType(Pmd).configureEach {
     if (name.toLowerCase().contains("test")) {
         source = fileTree("src/test/java")
+        ruleSetFiles = files("$rootDir/config/pmd/pmd-test.xml")
     } else {
         source = fileTree("src/main/java")
+        ruleSetFiles = files("$rootDir/config/pmd/pmd.xml")
     }
 }
 

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 /** Tests for {@link ErrorResponseFactory} mapping helpers. */
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.LinguisticNaming"})
 class ErrorResponseFactoryMappingTest {
     /** Sample field name used in tests. */
     private static final String FIELD_NAME = "name";
@@ -24,7 +23,7 @@ class ErrorResponseFactoryMappingTest {
      * </pre>
      */
     @Test
-    void toFieldErrorMapsRejectedValue() {
+    void mapsRejectedValueToFieldError() {
         final com.example.demo.model.FieldError nullValue =
                 ErrorResponseFactory.toFieldError(FIELD_NAME, FIELD_MESSAGE, null);
         assertThat(nullValue.getRejectedValue().isPresent()).isFalse();
@@ -46,7 +45,7 @@ class ErrorResponseFactoryMappingTest {
      * </pre>
      */
     @Test
-    void toFieldErrorUsesDefaultMessage() {
+    void usesDefaultMessageWhenMissing() {
         final com.example.demo.model.FieldError error =
                 ErrorResponseFactory.toFieldError(FIELD_NAME, null, "bad");
 
@@ -64,7 +63,7 @@ class ErrorResponseFactoryMappingTest {
      * </pre>
      */
     @Test
-    void mapStatusToCodeCoversAllCases() {
+    void mapsStatusToErrorCode() {
         assertThat(ErrorResponseFactory.mapStatusToCode(HttpStatus.UNAUTHORIZED))
                 .isEqualTo(ErrorCode.UNAUTHORIZED);
         assertThat(ErrorResponseFactory.mapStatusToCode(HttpStatus.FORBIDDEN))

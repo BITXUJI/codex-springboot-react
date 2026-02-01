@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /** Tests for {@link ErrorResponseFactory} response building. */
-@SuppressWarnings("PMD.LawOfDemeter")
 class ErrorResponseFactoryBuildResponseTest {
     /** API path used in build response tests. */
     private static final String API_PATH = "/api/hello";

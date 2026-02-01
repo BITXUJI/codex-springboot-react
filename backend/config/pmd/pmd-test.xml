@@ -1,15 +1,24 @@
 <?xml version="1.0"?>
-<!-- Comprehensive PMD ruleset for strict code quality checks. -->
-<ruleset name="Codex PMD Strict Rules"
+<!-- PMD ruleset tuned for test sources. -->
+<ruleset name="Codex PMD Test Rules"
          xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-    <description>Strict PMD rules covering best practices, style, design, documentation, and security.</description>
-    <rule ref="category/java/bestpractices.xml"/>
+    <description>PMD rules for test sources with relaxed design/literal constraints.</description>
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/UnitTestContainsTooManyAsserts">
+        <properties>
+            <property name="maximumAsserts" value="10"/>
+        </properties>
+    </rule>
     <rule ref="category/java/codestyle.xml">
         <exclude name="AtLeastOneConstructor"/>
     </rule>
-    <rule ref="category/java/design.xml"/>
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+    </rule>
     <!--
       Reason: LoosePackageCoupling requires explicit packages/classes or PMD logs a misconfigured rule warning.
       Mitigation: constrain the rule to our main package to keep it active without warnings.
@@ -27,7 +36,9 @@
             <property name="maxLines" value="20"/>
         </properties>
     </rule>
-    <rule ref="category/java/errorprone.xml"/>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidDuplicateLiterals"/>
+    </rule>
     <rule ref="category/java/multithreading.xml"/>
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/security.xml"/>
