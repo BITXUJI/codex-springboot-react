@@ -7,49 +7,49 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /** Tests for {@link DemoApplication}. */
 class DemoApplicationTest {
-  /** Label used to annotate assertions. */
-  private final String caseName;
+    /** Label used to annotate assertions. */
+    private final String caseName;
 
-  /** Creates the test instance. */
-  public DemoApplicationTest() {
-    caseName = "default";
-  }
-
-  /** Verifies the application context starts and stops. */
-  @Test
-  void runStartsAndStopsContext() {
-    try (ConfigurableApplicationContext context =
-        DemoApplication.run("--spring.main.web-application-type=none")) {
-      assertThat(context.isActive()).as(caseName).isTrue();
+    /** Creates the test instance. */
+    public DemoApplicationTest() {
+        caseName = "default";
     }
-  }
 
-  /** Verifies main closes the context when the exit flag is enabled. */
-  @Test
-  void mainClosesWhenFlagEnabled() {
-    System.setProperty("app.exitOnStart", "true");
-    try {
-      DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
-      assertThat(DemoApplication.getLastContext()).as(caseName).isNotNull();
-    } finally {
-      System.clearProperty("app.exitOnStart");
+    /** Verifies the application context starts and stops. */
+    @Test
+    void runStartsAndStopsContext() {
+        try (ConfigurableApplicationContext context =
+                DemoApplication.run("--spring.main.web-application-type=none")) {
+            assertThat(context.isActive()).as(caseName).isTrue();
+        }
     }
-  }
 
-  /** Verifies main keeps the context when the exit flag is disabled. */
-  @Test
-  void mainKeepsContextWhenFlagDisabled() {
-    DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
-    try (ConfigurableApplicationContext context = DemoApplication.getLastContext()) {
-      assertThat(context).as(caseName).isNotNull();
-      context.getId();
+    /** Verifies main closes the context when the exit flag is enabled. */
+    @Test
+    void mainClosesWhenFlagEnabled() {
+        System.setProperty("app.exitOnStart", "true");
+        try {
+            DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
+            assertThat(DemoApplication.getLastContext()).as(caseName).isNotNull();
+        } finally {
+            System.clearProperty("app.exitOnStart");
+        }
     }
-  }
 
-  /** Verifies the private constructor can be invoked via the test helper. */
-  @Test
-  void constructorIsCovered() {
-    final DemoApplication instance = DemoApplication.createForTest();
-    assertThat(instance.instanceMarker()).as(caseName).isEqualTo("instance");
-  }
+    /** Verifies main keeps the context when the exit flag is disabled. */
+    @Test
+    void mainKeepsContextWhenFlagDisabled() {
+        DemoApplication.main(new String[] {"--spring.main.web-application-type=none"});
+        try (ConfigurableApplicationContext context = DemoApplication.getLastContext()) {
+            assertThat(context).as(caseName).isNotNull();
+            context.getId();
+        }
+    }
+
+    /** Verifies the private constructor can be invoked via the test helper. */
+    @Test
+    void constructorIsCovered() {
+        final DemoApplication instance = DemoApplication.createForTest();
+        assertThat(instance.instanceMarker()).as(caseName).isEqualTo("instance");
+    }
 }

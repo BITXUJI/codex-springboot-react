@@ -8,9 +8,9 @@
     "files.eol": "\n",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "explicit"
     },
-    "java.format.settings.url": "${workspaceFolder}/backend/config/formatter/formatter.xml",
+    "java.format.settings.url": "../backend/config/formatter/formatter.xml",
     "java.format.settings.profile": "GoogleStyle",
     "[java]": {
       "editor.defaultFormatter": "redhat.java",
@@ -30,6 +30,7 @@
     },
     "[json]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "editor.defaultFormatter": "redhat.java"
   }
 }

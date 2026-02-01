@@ -15,38 +15,36 @@ import org.springframework.web.context.WebApplicationContext;
 /** Verifies the hello endpoint returns a message. */
 @SpringBootTest
 class HelloControllerTest {
-  /** Spring web application context used to configure MockMvc. */
-  private final WebApplicationContext context;
+    /** Spring web application context used to configure MockMvc. */
+    private final WebApplicationContext context;
 
-  /** MockMvc instance used for endpoint assertions. */
-  private MockMvc mockMvc;
+    /** MockMvc instance used for endpoint assertions. */
+    private MockMvc mockMvc;
 
-  /**
-   * Creates the test instance with Spring's web context.
-   *
-   * @param context web application context
-   */
-  public HelloControllerTest(final WebApplicationContext context) {
-    this.context = context;
-  }
+    /**
+     * Creates the test instance with Spring's web context.
+     *
+     * @param context web application context
+     */
+    public HelloControllerTest(final WebApplicationContext context) {
+        this.context = context;
+    }
 
-  /** Builds MockMvc before each test. */
-  @BeforeEach
-  void setUp() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-  }
+    /** Builds MockMvc before each test. */
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    }
 
-  /**
-   * Ensures the hello endpoint returns the expected payload.
-   *
-   * @throws Exception when the request fails
-   */
-  @Test
-  void returnsHelloMessage() throws Exception {
-    assertThat(mockMvc).isNotNull();
-    mockMvc
-        .perform(get("/api/hello"))
-        .andExpect(status().isOk())
-        .andExpect(content().json("{\"message\":\"Hello from Spring Boot\"}"));
-  }
+    /**
+     * Ensures the hello endpoint returns the expected payload.
+     *
+     * @throws Exception when the request fails
+     */
+    @Test
+    void returnsHelloMessage() throws Exception {
+        assertThat(mockMvc).isNotNull();
+        mockMvc.perform(get("/api/hello")).andExpect(status().isOk())
+                .andExpect(content().json("{\"message\":\"Hello from Spring Boot\"}"));
+    }
 }

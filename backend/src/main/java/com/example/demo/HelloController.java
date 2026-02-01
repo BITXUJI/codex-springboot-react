@@ -8,23 +8,23 @@ import org.springframework.web.bind.annotation.RestController;
 /** Implements the OpenAPI-generated interface. */
 @RestController
 public class HelloController implements HelloApi {
-  /** Default greeting returned by the API. */
-  private final String message;
+    /** Default greeting returned by the API. */
+    private final String message;
 
-  /**
-   * Returns a hello message.
-   *
-   * @return the hello response payload
-   */
-  @Override
-  public ResponseEntity<HelloResponse> getHello() {
-    final HelloResponse response = new HelloResponse();
-    response.setMessage(message);
-    return ResponseEntity.ok(response);
-  }
+    /**
+     * Returns a hello message.
+     *
+     * @return the hello response payload
+     */
+    @Override
+    public ResponseEntity<HelloResponse> getHello() {
+        final HelloResponse response = new HelloResponse();
+        response.setMessage(message);
+        return ResponseEntity.ok(response);
+    }
 
-  /** Default constructor. */
-  public HelloController() {
-    this.message = "Hello from Spring Boot";
-  }
+    /** Default constructor. */
+    public HelloController() {
+        this.message = "Hello from Spring Boot";
+    }
 }
