@@ -63,25 +63,10 @@ jobs:
           echo "- Artifact name: \`playwright-output\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Artifact URL: ${{ steps.upload_e2e_artifact.outputs.artifact-url }}" >> "$GITHUB_STEP_SUMMARY"
           if [ -f output/playwright/report.json ]; then
-            devbox run -- node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
-            const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('output/playwright/report.json', 'utf8'));
-            const stats = report.stats || {};
-            console.log(`- Tests expected: ${stats.expected ?? 'n/a'}`);
-            console.log(`- Tests unexpected: ${stats.unexpected ?? 'n/a'}`);
-            console.log(`- Tests flaky: ${stats.flaky ?? 'n/a'}`);
-            console.log(`- Duration(ms): ${stats.duration ?? 'n/a'}`);
-            NODE
+            devbox run -- node -e 'const fs=require("fs");const report=JSON.parse(fs.readFileSync("output/playwright/report.json","utf8"));const stats=report.stats||{};console.log("- Tests expected: " + (stats.expected ?? "n/a"));console.log("- Tests unexpected: " + (stats.unexpected ?? "n/a"));console.log("- Tests flaky: " + (stats.flaky ?? "n/a"));console.log("- Duration(ms): " + (stats.duration ?? "n/a"));' >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -f output/playwright/home-summary.json ]; then
-            devbox run -- node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
-            const fs = require('fs');
-            const summary = JSON.parse(fs.readFileSync('output/playwright/home-summary.json', 'utf8'));
-            console.log(`- URL: ${summary.url ?? 'n/a'}`);
-            console.log(`- Console errors: ${summary.consoleErrorCount ?? 'n/a'}`);
-            console.log(`- Page errors: ${summary.pageErrorCount ?? 'n/a'}`);
-            console.log(`- Failed requests: ${summary.failedRequestCount ?? 'n/a'}`);
-            NODE
+            devbox run -- node -e 'const fs=require("fs");const summary=JSON.parse(fs.readFileSync("output/playwright/home-summary.json","utf8"));console.log("- URL: " + (summary.url ?? "n/a"));console.log("- Console errors: " + (summary.consoleErrorCount ?? "n/a"));console.log("- Page errors: " + (summary.pageErrorCount ?? "n/a"));console.log("- Failed requests: " + (summary.failedRequestCount ?? "n/a"));' >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -f output/playwright/snapshots/home.png ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
