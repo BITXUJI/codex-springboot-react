@@ -43,6 +43,12 @@ public class AccessLogFilter extends OncePerRequestFilter {
     /** Paths that should not emit access logs. */
     private static final String[] SKIP_PATHS = {"/actuator", "/health"};
 
+    /**
+     * Determines whether the current request should skip logging.
+     *
+     * @param request current request
+     * @return true to skip logging
+     */
     @Override
     protected boolean shouldNotFilter(final HttpServletRequest request) {
         boolean skip = false;
@@ -58,6 +64,15 @@ public class AccessLogFilter extends OncePerRequestFilter {
         return skip;
     }
 
+    /**
+     * Main filter method to log access.
+     *
+     * @param request current request
+     * @param response current response
+     * @param filterChain filter chain
+     * @throws ServletException servlet exception
+     * @throws IOException IO exception
+     */
     @Override
     protected void doFilterInternal(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain filterChain)
