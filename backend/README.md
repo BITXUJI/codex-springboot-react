@@ -10,15 +10,16 @@ Spring Boot service built with Gradle in an OpenAPI-first workflow.
 - `config/` holds formatter and quality tool configuration.
 
 ## Prerequisites
-- Java 21+
-- Gradle (wrapper included)
+- `devbox` (recommended)
+- Optional fallback only: Java 21+ and Gradle wrapper
 
-## Common commands
+## Common Commands (Devbox-First)
 ```bash
-./gradlew clean build
-./gradlew test
-./gradlew javadoc
-./gradlew bootRun
+devbox run backend-javadoc
+devbox run backend-build
+devbox run backend-boot
+devbox run backend-dependency-check
+devbox run backend-security-report
 ```
 
 ## Taskfile shortcuts
@@ -28,14 +29,14 @@ task test
 task javadoc
 task check
 ```
-Use either Gradle commands or the Taskfile shortcuts; they map to the same workflows.
+Use `devbox run ...` as the primary entrypoint for runtime isolation. Taskfile and raw Gradle commands remain available as fallback.
 
 ## OpenAPI generation
 `openApiGenerate` runs as part of the build and generates API interfaces/models from `../openapi/api.yml`.
 
 ## Formatting and quality
 - Google Java format via `config/formatter/formatter.xml`.
-- Checkstyle/PMD/SpotBugs/JaCoCo run in `./gradlew check`.
+- Checkstyle/PMD/SpotBugs/JaCoCo run in backend Gradle checks.
 - OpenAPI-generated code is excluded from formatting and quality checks.
 
 ## Code style note

@@ -36,18 +36,14 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-      - name: Setup Java
+      - name: Install Devbox
         if: matrix.language == 'java-kotlin'
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
         with:
-          distribution: "temurin"
-          java-version: "21"
-      - name: Setup Gradle
-        if: matrix.language == 'java-kotlin'
-        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+          enable-cache: "true"
+          devbox-version: "0.16.0"
       - name: Build backend
         if: matrix.language == 'java-kotlin'
-        run: ./gradlew build -x test
-        working-directory: backend
+        run: devbox run backend-build-no-test
       - name: Analyze
         uses: github/codeql-action/analyze@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4.32.0

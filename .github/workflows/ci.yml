@@ -12,69 +12,41 @@ concurrency:
 jobs:
   frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
         with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          enable-cache: "true"
+          devbox-version: "0.16.0"
       - name: Install
-        run: npm ci
+        run: devbox run frontend-install
       - name: Run dev server (smoke)
-        run: |
-          set -euo pipefail
-          if timeout 20s npm run dev -- --host 0.0.0.0 --port 5173; then
-            echo "Dev server exited"
-          else
-            status=$?
-            if [ "$status" -eq 124 ]; then
-              echo "Dev server started"
-            else
-              exit "$status"
-            fi
-          fi
+        run: devbox run frontend-dev-smoke
       - name: Build
-        run: npm run build
+        run: devbox run frontend-build
       - name: Lint
-        run: npm run lint
+        run: devbox run frontend-lint
       - name: Test (coverage)
-        run: >
-          npm test -- --coverage
-          --coverageThreshold='{"global":{"branches":100,"functions":100,"lines":100,"statements":100}}'
+        run: devbox run frontend-test-coverage
 
   frontend-e2e:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
         with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-      - name: Setup Java
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
-        with:
-          distribution: "temurin"
-          java-version: "21"
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+          enable-cache: "true"
+          devbox-version: "0.16.0"
       - name: Install
-        run: npm ci
+        run: devbox run frontend-install
       - name: Install Playwright Browser
-        run: npx playwright install --with-deps chromium
+        run: devbox run frontend-e2e-install-ci
       - name: Test E2E
-        run: npm run test:e2e
+        run: devbox run frontend-e2e
       - name: Upload E2E Artifact
         id: upload_e2e_artifact
         if: always()
@@ -90,10 +62,10 @@ jobs:
           echo "## Frontend E2E Artifacts" >> "$GITHUB_STEP_SUMMARY"
           echo "- Artifact name: \`playwright-output\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Artifact URL: ${{ steps.upload_e2e_artifact.outputs.artifact-url }}" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f ../output/playwright/report.json ]; then
-            node -e "
+          if [ -f output/playwright/report.json ]; then
+            devbox run -- node -e "
               const fs = require('fs');
-              const report = JSON.parse(fs.readFileSync('../output/playwright/report.json', 'utf8'));
+              const report = JSON.parse(fs.readFileSync('output/playwright/report.json', 'utf8'));
               const stats = report.stats || {};
               console.log(\`- Tests expected: \${stats.expected ?? 'n/a'}\`);
               console.log(\`- Tests unexpected: \${stats.unexpected ?? 'n/a'}\`);
@@ -101,38 +73,33 @@ jobs:
               console.log(\`- Duration(ms): \${stats.duration ?? 'n/a'}\`);
             " >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -f ../output/playwright/home-summary.json ]; then
-            node -e "
+          if [ -f output/playwright/home-summary.json ]; then
+            devbox run -- node -e "
               const fs = require('fs');
-              const summary = JSON.parse(fs.readFileSync('../output/playwright/home-summary.json', 'utf8'));
+              const summary = JSON.parse(fs.readFileSync('output/playwright/home-summary.json', 'utf8'));
               console.log(\`- URL: \${summary.url ?? 'n/a'}\`);
               console.log(\`- Console errors: \${summary.consoleErrorCount ?? 'n/a'}\`);
               console.log(\`- Page errors: \${summary.pageErrorCount ?? 'n/a'}\`);
               console.log(\`- Failed requests: \${summary.failedRequestCount ?? 'n/a'}\`);
             " >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -f ../output/playwright/snapshots/home.png ]; then
+          if [ -f output/playwright/snapshots/home.png ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "### Home Screenshot Preview" >> "$GITHUB_STEP_SUMMARY"
-            b64_image=$(base64 < ../output/playwright/snapshots/home.png | tr -d '\n')
+            b64_image=$(base64 < output/playwright/snapshots/home.png | tr -d '\n')
             echo "<img alt=\"home screenshot\" src=\"data:image/png;base64,$b64_image\" width=\"960\" />" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   backend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Setup Java
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
         with:
-          distribution: "temurin"
-          java-version: "21"
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+          enable-cache: "true"
+          devbox-version: "0.16.0"
       - name: Cache OWASP Dependency-Check data
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
@@ -141,10 +108,10 @@ jobs:
           restore-keys: |
             dependency-check-${{ runner.os }}-
       - name: Javadoc
-        run: ./gradlew javadoc
+        run: devbox run backend-javadoc
       - name: Build
-        run: ./gradlew build
+        run: devbox run backend-build
       - name: Dependency Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: ./gradlew dependencyCheckAnalyze
+        run: devbox run backend-dependency-check

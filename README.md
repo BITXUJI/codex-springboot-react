@@ -1,48 +1,56 @@
 # codex-springboot-react
 
 This repo contains a minimal Spring Boot + React (Vite + TypeScript) setup with an OpenAPI-first workflow.
+Runtime isolation is managed by `devbox` at repository level.
 
 ## Structure
 - `openapi/api.yml` is the source of truth for the HTTP API.
 - `backend/` is a Spring Boot + Gradle service that implements the API.
 - `frontend/` is a Vite React app that calls the API.
+- `devbox.json` pins local runtime versions (Node and Java) and shared scripts.
 
 ## Prerequisites
-- Java 21+
-- Gradle (local install is OK)
-- Node 22+ and npm
+- `devbox` (recommended)
+- Optional fallback only: Java 21+, Node 22+, npm
+
+## Quick Start (Devbox-First)
+```bash
+cd /Users/jixu/Desktop/codex-springboot-react
+devbox install
+devbox run doctor
+```
+First `devbox install` may trigger Nix installation and require interactive sudo on macOS.
+
+See `/Users/jixu/Desktop/codex-springboot-react/docs/devbox.md` for details.
 
 ## Backend
 ```bash
-cd backend
-# Generates code from OpenAPI and runs static checks + tests
-./gradlew clean build
+devbox run backend-javadoc
+devbox run backend-build
+devbox run backend-boot
 ```
 
 ## Frontend
 ```bash
-cd frontend
-# Install deps, generate API client, then run checks
-npm install
-npm run generate
-npm run lint
-npm test
-npm run dev
+devbox run frontend-install
+devbox run frontend-generate
+devbox run frontend-build
+devbox run frontend-lint
+devbox run frontend-test
+devbox run frontend-dev
 ```
 
-## Playwright regression
+## Playwright Regression
 ```bash
-cd frontend
-# One-time browser install
-npm run test:e2e:install
-# Runs backend + frontend preview automatically and executes browser checks
-npm run test:e2e
+devbox run frontend-e2e-install
+devbox run frontend-e2e
 ```
+
 Generated artifacts are written to `output/playwright/`. In GitHub Actions, they are uploaded as artifact `playwright-output` in the `frontend-e2e` job.
 
 ## OpenAPI generation
 - Backend: `openApiGenerate` runs during `build` to generate interfaces/models from `openapi/api.yml`.
-- Frontend: `npm run generate` uses `openapi-typescript` to generate a typed client.
+- Frontend: `devbox run frontend-generate` uses `openapi-typescript` to generate a typed client.
 
 ## Formatting
 - VS Code is configured for format-on-save via `.vscode/settings.json` and the devcontainer settings.
@@ -54,9 +62,9 @@ Generated artifacts are written to `output/playwright/`. In GitHub Actions, they
 - Prefer Lombok annotations to avoid hand-written Java boilerplate (constructors, getters/setters, builders).
 
 ## Security and SBOM
-- Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze` (reports in `backend/build/reports/dependency-check`).
-- CycloneDX SBOM: `./gradlew cyclonedxBom` (output in `backend/build/reports`).
-- Combined security report task: `./gradlew securityReport`.
+- Dependency vulnerability scan: `devbox run backend-dependency-check` (reports in `backend/build/reports/dependency-check`).
+- CycloneDX SBOM: run from backend Gradle tasks (output in `backend/build/reports`).
+- Combined security report task: `devbox run backend-security-report`.
 - For faster Dependency-Check scans, set `NVD_API_KEY` (from the NVD API key portal) as an environment variable.
 
 ## Release publishing
@@ -69,11 +77,12 @@ Generated artifacts are written to `output/playwright/`. In GitHub Actions, they
   - `git push origin v1.0.0`
 
 ## Local dev flow
-1. Start the backend: `./gradlew bootRun` (port 8080).
-2. Start the frontend: `npm run dev` (port 5173).
+1. Start the backend: `devbox run backend-boot` (port 8080).
+2. Start the frontend: `devbox run frontend-dev` (port 5173).
 3. Open the app; it calls `GET /api/hello` and renders the response.
 
 ## Debug and troubleshooting commands
+- Runtime check: `devbox run doctor`
 - Backend build with full warnings: `cd backend && task build:debug`
 - Backend Javadoc with full warnings: `cd backend && task javadoc:debug`
 - Backend tests with full warnings: `cd backend && task test:debug`

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@22.22.0",
+    "javaPackages.compiler.temurin-bin.jdk-21@21.0.8"
+  ],
+  "shell": {
+    "scripts": {
+      "doctor": [
+        "echo \"Node: $(node -v)\"",
+        "echo \"npm: $(npm -v)\"",
+        "java -version"
+      ],
+      "backend-javadoc": "cd backend && ./gradlew javadoc",
+      "backend-build": "cd backend && ./gradlew build",
+      "backend-build-no-test": "cd backend && ./gradlew assemble",
+      "backend-boot": "cd backend && ./gradlew bootRun",
+      "backend-dependency-check": "cd backend && ./gradlew dependencyCheckAnalyze",
+      "backend-security-report": "cd backend && ./gradlew securityReport",
+      "backend-publish": "cd backend && ./gradlew publish",
+      "backend-publish-release": "cd backend && VERSION=${GITHUB_REF_NAME#v} && ./gradlew publish -Pversion=$VERSION",
+      "frontend-install": "cd frontend && npm ci",
+      "frontend-dev": "cd frontend && npm run dev",
+      "frontend-dev-smoke": "set -euo pipefail; if timeout 20s bash -lc 'cd frontend && npm run dev -- --host 0.0.0.0 --port 5173'; then echo 'Dev server exited'; else status=$?; if [ \"$status\" -eq 124 ]; then echo 'Dev server started'; else exit \"$status\"; fi; fi",
+      "frontend-build": "cd frontend && npm run build",
+      "frontend-lint": "cd frontend && npm run lint",
+      "frontend-test": "cd frontend && npm test -- --watch=false",
+      "frontend-test-coverage": "cd frontend && npm test -- --coverage --coverageThreshold='{\"global\":{\"branches\":100,\"functions\":100,\"lines\":100,\"statements\":100}}'",
+      "frontend-generate": "cd frontend && npm run generate",
+      "frontend-e2e-install": "cd frontend && npm run test:e2e:install",
+      "frontend-e2e-install-ci": "cd frontend && npx playwright install --with-deps chromium",
+      "frontend-e2e": "cd frontend && npm run test:e2e",
+      "frontend-release-package": "cd frontend && npm ci && npm run build && cd dist && zip -r ../frontend-dist.zip .",
+      "frontend-verify-precommit": "cd frontend && npm run verify:precommit",
+      "verify-all": [
+        "(cd backend && ./gradlew javadoc build)",
+        "(cd frontend && npm run build)",
+        "(cd frontend && npm run lint)",
+        "(cd frontend && npm run test:e2e)"
+      ]
+    }
+  }
+}

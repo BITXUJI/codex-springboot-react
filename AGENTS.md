@@ -1,16 +1,17 @@
 # Agents
 
 This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or server code.
+This repo is also runtime-isolated with Devbox. Prefer `devbox run <script>` from repository root for local commands.
 
 ## Collaboration workflow
 1. **Plan and research when needed**: For complex, high-risk, or unclear tasks (or anything involving dependency/version changes), think and research (web browsing allowed), then provide a concrete plan with reasons. Ask what the user does not understand and explain first. If the user wants changes, propose a revised plan. Only request to implement after a few rounds of clear, agreed reasons and steps. For simple, low-risk, clearly scoped tasks, proceed with a brief plan and post-change confirmation.
 2. **Best-practice guidance**: If the user's approach is not best practice or details are unclear, suggest alternatives and ask for specifics. If details are unclear, offer a few options with purpose/why; iterate once or twice to converge, then implement.
 3. **Testing expectations by scope**: After code changes, run relevant tests/verification aligned to the change scope:
-   - Frontend small changes: `npm run lint`, `npm test` (keep coverage at or above configured thresholds).
-   - Frontend build-impacting changes: add `npm run build`.
-   - Frontend runtime/integration changes (API wiring, CSP, routing, Vite config): add `npm run test:e2e` (Playwright).
-   - Backend small changes: `./gradlew test` or `./gradlew build` (as appropriate).
-   - Dependency or security-related changes: run `./gradlew dependencyCheckAnalyze` and/or `./gradlew cyclonedxBom`.
+   - Frontend small changes: `devbox run frontend-lint`, `devbox run frontend-test` (keep coverage at or above configured thresholds).
+   - Frontend build-impacting changes: add `devbox run frontend-build`.
+   - Frontend runtime/integration changes (API wiring, CSP, routing, Vite config): add `devbox run frontend-e2e` (Playwright).
+   - Backend small changes: `devbox run backend-build` (or backend gradle test/build as appropriate).
+   - Dependency or security-related changes: run `devbox run backend-dependency-check` and/or backend CycloneDX task.
    Ensure no regressions, no violations of static checks, and coverage does not drop below required thresholds.
 
 ## Standards
@@ -25,19 +26,19 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - For dependency versions and CI/CD action versions, always verify online that the version is current, available, and compatible before updating.
 
 ## Checks (before sharing changes)
-- Backend: `./gradlew javadoc` and `./gradlew build`
-- Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`, `npm run test:e2e`
+- Backend: `devbox run backend-javadoc` and `devbox run backend-build`
+- Frontend: `devbox run frontend-dev` (smoke), `devbox run frontend-build`, `devbox run frontend-lint`, `devbox run frontend-e2e`
 
 ## Commit gate
-- For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
+- For commits that touch frontend runtime/config behavior, run `devbox run frontend-verify-precommit` before `git commit`.
 
 ## Security tooling
-- Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze`
-- CycloneDX SBOM: `./gradlew cyclonedxBom` or `./gradlew securityReport`
+- Dependency vulnerability scan: `devbox run backend-dependency-check`
+- CycloneDX SBOM: backend Gradle task `cyclonedxBom` or `devbox run backend-security-report`
 - Reports live under `backend/build/reports`
 - Set `NVD_API_KEY` (from the NVD API key portal) in CI/local env for faster Dependency-Check scans.
 
 ## Release publishing
 - Tag `v*` to trigger the release workflow.
 - Frontend release asset: `frontend-dist.zip`.
-- Backend publishes to GitHub Packages (Maven) via `./gradlew publish`.
+- Backend publishes to GitHub Packages (Maven) via `devbox run backend-publish` (or direct Gradle command in CI).

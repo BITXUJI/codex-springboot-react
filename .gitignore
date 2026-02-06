@@ -36,3 +36,7 @@ output/
 frontend/playwright-report/
 frontend/test-results/
 frontend/blob-report/
+
+# Devbox / direnv local state
+.devbox/
+.direnv/

@@ -8,18 +8,18 @@ Vite + React + TypeScript frontend that calls the Spring Boot API.
 - `src/setupTests.ts` configures Jest DOM matchers.
 
 ## Prerequisites
-- Node 22+ and npm
-- Java 21+ (required for `npm run test:e2e`, which starts the backend)
+- `devbox` (recommended)
+- Optional fallback only: Node 22+, npm, and Java 21+
 
-## Common commands
+## Common Commands (Devbox-First)
 ```bash
-npm ci
-npm run dev
-npm run generate
-npm run build
-npm run lint
-npm test
-npm run test:e2e
+devbox run frontend-install
+devbox run frontend-dev
+devbox run frontend-generate
+devbox run frontend-build
+devbox run frontend-lint
+devbox run frontend-test
+devbox run frontend-e2e
 ```
 
 ## Taskfile shortcuts
@@ -32,9 +32,10 @@ task test
 task test:e2e
 task verify:precommit
 ```
+Use `devbox run ...` as the primary entrypoint for runtime isolation. Taskfile and raw npm commands remain available as fallback.
 
 ## OpenAPI generation
-`npm run generate` regenerates `src/api/generated.ts` from `../openapi/api.yml`.
+`devbox run frontend-generate` regenerates `src/api/generated.ts` from `../openapi/api.yml`.
 
 ## Testing
 ```bash
@@ -44,16 +45,16 @@ task test:coverage
 ## Playwright end-to-end regression
 ```bash
 # One-time browser setup
-npm run test:e2e:install
+devbox run frontend-e2e-install
 
 # Runs backend + frontend preview automatically, then executes e2e tests
-npm run test:e2e
+devbox run frontend-e2e
 
 # Pre-commit quality gate for frontend runtime/config changes
-npm run verify:precommit
+devbox run frontend-verify-precommit
 ```
 
-`npm run test:e2e` validates:
+`devbox run frontend-e2e` validates:
 - Page renders expected UI.
 - `/api/hello` flow works against the backend.
 - Browser console/page/request failure signals remain clean.

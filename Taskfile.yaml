@@ -1,6 +1,26 @@
 version: '3'
 
 tasks:
+  devbox:install:
+    desc: Install packages declared in devbox.json
+    cmds:
+      - devbox install
+
+  devbox:doctor:
+    desc: Print runtime versions from the devbox shell
+    cmds:
+      - devbox run doctor
+
+  devbox:verify:
+    desc: Run repository verification checks in devbox
+    cmds:
+      - devbox run verify-all
+
+  devbox:shell:
+    desc: Open an interactive shell with devbox runtimes
+    cmds:
+      - devbox shell
+
   act:ci:
     desc: Run CI workflow locally with act
     cmds:
