@@ -31,6 +31,16 @@ tasks:
     cmds:
       - npm test -- --coverage
 
+  test:e2e:
+    desc: Run Playwright end-to-end regression tests
+    cmds:
+      - npm run test:e2e
+
+  verify:precommit:
+    desc: Run frontend pre-commit quality gate
+    cmds:
+      - npm run verify:precommit
+
   generate:
     desc: Generate API client from OpenAPI
     cmds:

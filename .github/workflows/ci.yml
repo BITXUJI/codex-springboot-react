@@ -48,6 +48,76 @@ jobs:
           npm test -- --coverage
           --coverageThreshold='{"global":{"branches":100,"functions":100,"lines":100,"statements":100}}'
 
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Setup Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        with:
+          distribution: "temurin"
+          java-version: "21"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
+      - name: Install
+        run: npm ci
+      - name: Install Playwright Browser
+        run: npx playwright install --with-deps chromium
+      - name: Test E2E
+        run: npm run test:e2e
+      - name: Upload E2E Artifact
+        id: upload_e2e_artifact
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: playwright-output
+          path: output/playwright
+          if-no-files-found: warn
+          retention-days: 14
+      - name: E2E Summary
+        if: always()
+        run: |
+          echo "## Frontend E2E Artifacts" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Artifact name: \`playwright-output\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Artifact URL: ${{ steps.upload_e2e_artifact.outputs.artifact-url }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f ../output/playwright/report.json ]; then
+            node -e "
+              const fs = require('fs');
+              const report = JSON.parse(fs.readFileSync('../output/playwright/report.json', 'utf8'));
+              const stats = report.stats || {};
+              console.log(\`- Tests expected: \${stats.expected ?? 'n/a'}\`);
+              console.log(\`- Tests unexpected: \${stats.unexpected ?? 'n/a'}\`);
+              console.log(\`- Tests flaky: \${stats.flaky ?? 'n/a'}\`);
+              console.log(\`- Duration(ms): \${stats.duration ?? 'n/a'}\`);
+            " >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f ../output/playwright/home-summary.json ]; then
+            node -e "
+              const fs = require('fs');
+              const summary = JSON.parse(fs.readFileSync('../output/playwright/home-summary.json', 'utf8'));
+              console.log(\`- URL: \${summary.url ?? 'n/a'}\`);
+              console.log(\`- Console errors: \${summary.consoleErrorCount ?? 'n/a'}\`);
+              console.log(\`- Page errors: \${summary.pageErrorCount ?? 'n/a'}\`);
+              console.log(\`- Failed requests: \${summary.failedRequestCount ?? 'n/a'}\`);
+            " >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f ../output/playwright/snapshots/home.png ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Home Screenshot Preview" >> "$GITHUB_STEP_SUMMARY"
+            b64_image=$(base64 < ../output/playwright/snapshots/home.png | tr -d '\n')
+            echo "<img alt=\"home screenshot\" src=\"data:image/png;base64,$b64_image\" width=\"960\" />" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   backend:
     runs-on: ubuntu-latest
     defaults:

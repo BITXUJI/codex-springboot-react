@@ -8,6 +8,7 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 3. **Testing expectations by scope**: After code changes, run relevant tests/verification aligned to the change scope:
    - Frontend small changes: `npm run lint`, `npm test` (keep coverage at or above configured thresholds).
    - Frontend build-impacting changes: add `npm run build`.
+   - Frontend runtime/integration changes (API wiring, CSP, routing, Vite config): add `npm run test:e2e` (Playwright).
    - Backend small changes: `./gradlew test` or `./gradlew build` (as appropriate).
    - Dependency or security-related changes: run `./gradlew dependencyCheckAnalyze` and/or `./gradlew cyclonedxBom`.
    Ensure no regressions, no violations of static checks, and coverage does not drop below required thresholds.
@@ -25,7 +26,10 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 
 ## Checks (before sharing changes)
 - Backend: `./gradlew javadoc` and `./gradlew build`
-- Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`
+- Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`, `npm run test:e2e`
+
+## Commit gate
+- For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
 
 ## Security tooling
 - Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze`

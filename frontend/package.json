@@ -11,6 +11,10 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "test:e2e:headed": "playwright test --headed",
+    "verify:precommit": "npm run lint && npm test -- --watch=false && npm run build && npm run test:e2e",
     "generate": "openapi-typescript ../openapi/api.yml -o src/api/generated.ts"
   },
   "dependencies": {
@@ -21,6 +25,7 @@
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.12",
+    "@playwright/test": "1.58.1",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "8.22.0",

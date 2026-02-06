@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ApiError, fetchHello } from './api/helloClient';
+import './App.css';
 
 /**
  * Renders the hello message returned by the API.
@@ -42,7 +43,7 @@ export default function App() {
   }, []);
 
   return (
-    <main style={{ fontFamily: 'Arial, sans-serif', padding: '2rem' }}>
+    <main className="app-shell">
       <h1>Codex React + Spring Boot</h1>
       {error ? <p role="alert">{error}</p> : <p>{message}</p>}
     </main>

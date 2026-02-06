@@ -30,6 +30,16 @@ npm test
 npm run dev
 ```
 
+## Playwright regression
+```bash
+cd frontend
+# One-time browser install
+npm run test:e2e:install
+# Runs backend + frontend preview automatically and executes browser checks
+npm run test:e2e
+```
+Generated artifacts are written to `output/playwright/`. In GitHub Actions, they are uploaded as artifact `playwright-output` in the `frontend-e2e` job.
+
 ## OpenAPI generation
 - Backend: `openApiGenerate` runs during `build` to generate interfaces/models from `openapi/api.yml`.
 - Frontend: `npm run generate` uses `openapi-typescript` to generate a typed client.

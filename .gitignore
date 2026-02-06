@@ -28,3 +28,11 @@ backend/bin/
 
 # Logs
 *.log
+
+# Local test artifacts
+output/
+
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
