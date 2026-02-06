@@ -10,7 +10,15 @@ const DEFAULT_TIMEOUT_MS = 8000;
 /** Trace header used for request correlation. */
 const TRACE_ID_HEADER = 'X-Request-Id';
 
-/** API error raised by the client helpers. */
+/**
+ * API error raised by the client helpers.
+ * <pre>
+ * Responsibilities:
+ * 1) Carry a user-facing error message.
+ * 2) Attach transport metadata such as status, code, and trace id.
+ * 3) Distinguish timeout failures from other network failures.
+ * </pre>
+ */
 export class ApiError extends Error {
   /** Error code associated with the failure. */
   code?: string;
@@ -25,6 +33,12 @@ export class ApiError extends Error {
 
   /**
    * Creates a typed API error.
+   * <pre>
+   * Algorithm:
+   * 1) Initialize the base Error with the provided message.
+   * 2) Set a stable error name for runtime checks.
+   * 3) Merge optional metadata fields into the instance.
+   * </pre>
    *
    * @param message error message
    * @param options extra error metadata
@@ -38,6 +52,12 @@ export class ApiError extends Error {
 
 /**
  * Detects abort-related errors from fetch.
+ * <pre>
+ * Algorithm:
+ * 1) Check whether the value is a DOMException.
+ * 2) Verify that the exception name is "AbortError".
+ * 3) Return true only when both conditions are satisfied.
+ * </pre>
  *
  * @param error unknown error value
  * @returns true when the error represents an abort
@@ -48,6 +68,12 @@ function isAbortError(error: unknown): boolean {
 
 /**
  * Validates the error response shape.
+ * <pre>
+ * Algorithm:
+ * 1) Reject null and non-object payloads.
+ * 2) Cast to ErrorResponse candidate for field checks.
+ * 3) Verify required fields and their primitive types.
+ * </pre>
  *
  * @param payload parsed JSON payload
  * @returns true when the payload is a valid error response
@@ -68,6 +94,12 @@ function isErrorResponse(payload: unknown): payload is ErrorResponse {
 
 /**
  * Builds an ApiError from a non-2xx response.
+ * <pre>
+ * Algorithm:
+ * 1) Reuse backend error payload when it matches ErrorResponse.
+ * 2) Fallback to a generic HTTP_ERROR when payload shape is unknown.
+ * 3) Preserve trace id from payload first, then from response headers.
+ * </pre>
  *
  * @param status HTTP status code
  * @param payload parsed response payload
@@ -96,6 +128,14 @@ function buildErrorFromResponse(
 
 /**
  * Loads the hello message from the backend.
+ * <pre>
+ * Algorithm:
+ * 1) Create an AbortController with timeout-based cancellation.
+ * 2) Call /api/hello and parse JSON on success.
+ * 3) Convert non-2xx responses into ApiError with trace metadata.
+ * 4) Map abort and unknown failures to typed network errors.
+ * 5) Always clear the timeout in the finally block.
+ * </pre>
  *
  * @param options request options
  * @returns hello response payload

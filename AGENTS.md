@@ -14,6 +14,8 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 
 ## Standards
 - Write comments in English.
+- For manual Javadoc/JSDoc updates, keep the first line as a short summary and add a concrete English procedure under it using `<pre>...</pre>` (for example: `Algorithm`, `Responsibilities`, or `Usage` with numbered steps).
+- Apply the Javadoc/JSDoc expansion to hand-written source files by default; keep existing test comments unchanged unless explicitly requested.
 - Keep generated code isolated and reproducible.
 - Do not hand-edit OpenAPI-generated code; keep manual changes in non-generated sources.
 - OpenAPI-generated code is excluded from formatting and quality checks.

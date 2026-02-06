@@ -4,7 +4,16 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-/** Sanitizes log content to avoid leaking sensitive data. */
+/**
+ * Sanitizes log content to avoid leaking sensitive data.
+ * 
+ * <pre>
+ * Responsibilities:
+ * 1) Mask sensitive key-value pairs in JSON and form payloads.
+ * 2) Mask known secret-bearing HTTP headers.
+ * 3) Keep non-sensitive content unchanged for diagnostics.
+ * </pre>
+ */
 public final class LogSanitizer {
     /** JSON field matcher for sensitive keys. */
     private static final Pattern JSON_MASK = Pattern
@@ -22,11 +31,26 @@ public final class LogSanitizer {
     private static final Set<String> SENSITIVE_HEADERS = Set.of("authorization",
             "proxy-authorization", "cookie", "set-cookie", "x-api-key", "x-auth-token");
 
-    /** Utility class. */
+    /**
+     * Utility class.
+     * 
+     * <pre>
+     * Design note:
+     * 1) Exposes only static sanitization helpers.
+     * 2) Private constructor blocks accidental instantiation.
+     * </pre>
+     */
     private LogSanitizer() {}
 
     /**
      * Masks sensitive fields in request/response bodies.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Return input unchanged when body is null or blank.
+     * 2) Normalize content type to select applicable masking rules.
+     * 3) Apply JSON and/or form regex masking for sensitive keys.
+     * </pre>
      *
      * @param body raw body
      * @param contentType content type header
@@ -49,6 +73,13 @@ public final class LogSanitizer {
 
     /**
      * Masks sensitive headers.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Return null when header value is null.
+     * 2) Normalize header name to lowercase.
+     * 3) Replace sensitive header values with "****".
+     * </pre>
      *
      * @param headerName header name
      * @param headerValue header value

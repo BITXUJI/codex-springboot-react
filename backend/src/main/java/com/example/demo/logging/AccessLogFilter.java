@@ -27,7 +27,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
-/** Logs structured access logs with request/response payloads and trace IDs. */
+/**
+ * Logs structured access logs with request/response payloads and trace IDs.
+ * 
+ * <pre>
+ * Responsibilities:
+ * 1) Intercept each HTTP request once and measure request duration.
+ * 2) Capture sanitized request/response metadata for observability.
+ * 3) Propagate a trace identifier across logging context and response headers.
+ * </pre>
+ */
 @Component
 @NoArgsConstructor
 public class AccessLogFilter extends OncePerRequestFilter {
@@ -45,6 +54,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Determines whether the current request should skip logging.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read request URI from the current request.
+     * 2) Compare the path against known skip prefixes.
+     * 3) Return true when any prefix matches, otherwise false.
+     * </pre>
      *
      * @param request current request
      * @return true to skip logging
@@ -66,6 +82,14 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Main filter method to log access.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Wrap request/response with content-caching wrappers.
+     * 2) Resolve trace ID, bind it to MDC, and write it to response headers.
+     * 3) Execute downstream filter chain and capture raised IO/Servlet exceptions.
+     * 4) Log access details, clear MDC, and copy cached response body back.
+     * </pre>
      *
      * @param request current request
      * @param response current response
@@ -103,6 +127,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Emits structured access log payload.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Capture sanitized request/response bodies and headers.
+     * 2) Derive final status code, including failure fallback to 500.
+     * 3) Write one structured "access" log event with all key attributes.
+     * </pre>
      *
      * @param request cached request
      * @param response cached response
@@ -151,6 +182,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Resolves or generates a trace id.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Try X-Request-Id from incoming headers.
+     * 2) Validate that the value is non-blank.
+     * 3) Generate UUID when the header is missing or empty.
+     * </pre>
      *
      * @param request current request
      * @return trace identifier
@@ -166,6 +204,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Resolves client IP address from forwarding headers.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Start with request.getRemoteAddr() as fallback.
+     * 2) If X-Forwarded-For exists, take the first comma-separated value.
+     * 3) Return the resolved client-facing IP value.
+     * </pre>
      *
      * @param request current request
      * @return client IP
@@ -183,6 +228,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Collects and masks request headers.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Iterate all request header names.
+     * 2) Join multiple values into a comma-separated string.
+     * 3) Mask sensitive headers before storing them in the output map.
+     * </pre>
      *
      * @param request current request
      * @return sanitized headers
@@ -202,6 +254,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Collects and masks response headers.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Iterate response header names.
+     * 2) Replace null header values with an empty string.
+     * 3) Mask sensitive values before storing them in the output map.
+     * </pre>
      *
      * @param response current response
      * @return sanitized headers
@@ -220,6 +279,14 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Captures and truncates payload body.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Return an empty capture when payload is null or empty.
+     * 2) Omit non-text content types to avoid binary log noise.
+     * 3) Decode text payload with resolved charset and sanitize sensitive data.
+     * 4) Truncate content above MAX_BODY_BYTES and mark the truncation flag.
+     * </pre>
      *
      * @param bodyBytes raw body bytes
      * @param contentType content type header
@@ -246,6 +313,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Checks whether the content type is safe to log as text.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Treat null content type as text-like for backward compatibility.
+     * 2) Normalize value to lowercase.
+     * 3) Accept text/*, JSON, XML, and form-url-encoded content types.
+     * </pre>
      *
      * @param contentType content type header
      * @return true if text-like
@@ -264,6 +338,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Resolves the charset declared in content type.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Default to UTF-8.
+     * 2) Extract charset=... token when provided.
+     * 3) Resolve with Charset.forName and fallback to UTF-8 on invalid values.
+     * </pre>
      *
      * @param contentType content type header
      * @return charset to decode with
@@ -291,6 +372,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /**
      * Captured body content with metadata.
+     * 
+     * <pre>
+     * Data contract:
+     * 1) body contains sanitized text or null.
+     * 2) truncated indicates whether body was shortened to MAX_BODY_BYTES.
+     * 3) omitted indicates non-text payloads intentionally excluded from logs.
+     * </pre>
      *
      * @param body captured body
      * @param truncated whether the body was truncated

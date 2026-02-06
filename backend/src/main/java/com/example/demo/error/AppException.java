@@ -6,7 +6,16 @@ import java.util.Map;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/** Domain-friendly exception with structured error metadata. */
+/**
+ * Domain-friendly exception with structured error metadata.
+ * 
+ * <pre>
+ * Responsibilities:
+ * 1) Store API-facing error code and HTTP status together with the message.
+ * 2) Optionally carry structured ErrorDetails for clients.
+ * 3) Protect internal state by copying mutable detail data.
+ * </pre>
+ */
 @Getter
 public class AppException extends RuntimeException {
     private static final long serialVersionUID = 1L;
@@ -20,6 +29,12 @@ public class AppException extends RuntimeException {
 
     /**
      * Creates a domain exception with a status and message.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Delegate to the full constructor.
+     * 2) Pass null for optional structured details.
+     * </pre>
      *
      * @param code error code
      * @param message error message
@@ -31,6 +46,13 @@ public class AppException extends RuntimeException {
 
     /**
      * Creates a domain exception with optional details.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Store the message in RuntimeException via super(message).
+     * 2) Save code and status exactly as provided.
+     * 3) Copy details defensively to avoid external mutation.
+     * </pre>
      *
      * @param code error code
      * @param message error message
@@ -47,6 +69,13 @@ public class AppException extends RuntimeException {
 
     /**
      * Returns structured error details.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read the internally stored details reference.
+     * 2) Return a defensive copy for caller safety.
+     * 3) Return null when no details exist.
+     * </pre>
      *
      * @return details or null
      */
@@ -56,6 +85,15 @@ public class AppException extends RuntimeException {
 
     /**
      * Copies the error details to avoid exposing internal state.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Return null when source is null.
+     * 2) Create a new ErrorDetails instance.
+     * 3) Copy fieldErrors into a new list when present.
+     * 4) Copy additionalProperties entries one by one.
+     * 5) Return the copied object.
+     * </pre>
      *
      * @param source original details
      * @return defensive copy or null

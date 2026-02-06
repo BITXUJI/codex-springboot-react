@@ -10,16 +10,40 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-/** Builds standard error responses for the API. */
+/**
+ * Builds standard error responses for the API.
+ * 
+ * <pre>
+ * Responsibilities:
+ * 1) Assemble canonical ErrorResponse payloads.
+ * 2) Resolve trace identifiers consistently across request contexts.
+ * 3) Convert validation and status data to API-facing error structures.
+ * </pre>
+ */
 public final class ErrorResponseFactory {
     /** Request/response header used for trace propagation. */
     private static final String TRACE_ID_HEADER = "X-Request-Id";
 
-    /** Utility class; no instances. */
+    /**
+     * Utility class; no instances.
+     * 
+     * <pre>
+     * Design note:
+     * 1) All behavior is exposed as static helper methods.
+     * 2) Private constructor prevents accidental instantiation.
+     * </pre>
+     */
     private ErrorResponseFactory() {}
 
     /**
      * Builds a standard error response payload.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Create ErrorResponse and set code, message, traceId, timestamp, and path.
+     * 2) Attach details only when field errors or additional properties are present.
+     * 3) Return a ResponseEntity with the provided HTTP status.
+     * </pre>
      *
      * @param status HTTP status
      * @param code error code
@@ -49,6 +73,13 @@ public final class ErrorResponseFactory {
 
     /**
      * Resolves the current trace identifier.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read traceId from MDC when available.
+     * 2) Fallback to X-Request-Id request header.
+     * 3) Generate a random UUID when no incoming value exists.
+     * </pre>
      *
      * @param request current request
      * @return trace id
@@ -66,6 +97,13 @@ public final class ErrorResponseFactory {
 
     /**
      * Maps validation data into the error field payload.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Create a FieldError model instance.
+     * 2) Populate field and message (fallback to "Invalid value" when missing).
+     * 3) Store rejected value as JsonNullable.undefined() or stringified value.
+     * </pre>
      *
      * @param field field name
      * @param message validation message
@@ -88,6 +126,13 @@ public final class ErrorResponseFactory {
 
     /**
      * Maps HTTP status codes to error codes.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Switch on the provided HttpStatus.
+     * 2) Map common security and client statuses explicitly.
+     * 3) Use INTERNAL_ERROR as the default fallback.
+     * </pre>
      *
      * @param status HTTP status
      * @return error code
