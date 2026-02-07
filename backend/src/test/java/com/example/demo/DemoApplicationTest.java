@@ -2,6 +2,9 @@ package com.example.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -46,10 +49,15 @@ class DemoApplicationTest {
         }
     }
 
-    /** Verifies the private constructor can be invoked via the test helper. */
+    /** Verifies the private constructor can be invoked via method handles. */
     @Test
-    void constructorIsCovered() {
-        final DemoApplication instance = DemoApplication.createForTest();
-        assertThat(instance.instanceMarker()).as(caseName).isEqualTo("instance");
+    void constructorIsCovered() throws Throwable {
+        final MethodHandles.Lookup lookup =
+                MethodHandles.privateLookupIn(DemoApplication.class, MethodHandles.lookup());
+        final MethodHandle constructor =
+                lookup.findConstructor(DemoApplication.class, MethodType.methodType(void.class));
+        final DemoApplication instance = (DemoApplication) constructor.invoke();
+        assertThat(instance).as(caseName).isNotNull();
+        assertThat(DemoApplication.INSTANCE_MARKER).as(caseName).isEqualTo("instance");
     }
 }

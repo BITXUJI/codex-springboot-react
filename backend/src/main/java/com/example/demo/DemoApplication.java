@@ -17,6 +17,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public final class DemoApplication {
     /**
+     * Stable marker value used by tests that verify instance creation.
+     */
+    /* default */ static final String INSTANCE_MARKER = "instance";
+
+    /**
      * Tracks the most recently started application context (primarily for tests).
      */
     private static ConfigurableApplicationContext lastContext;
@@ -64,21 +69,6 @@ public final class DemoApplication {
     }
 
     /**
-     * Creates a new application instance for test coverage.
-     * 
-     * <pre>
-     * Algorithm:
-     * 1) Invoke the private constructor.
-     * 2) Return a concrete instance for non-static coverage checks.
-     * </pre>
-     *
-     * @return new application instance
-     */
-    /* default */ static DemoApplication createForTest() {
-        return new DemoApplication();
-    }
-
-    /**
      * Returns the most recently started application context.
      * 
      * <pre>
@@ -106,18 +96,4 @@ public final class DemoApplication {
         // Intentionally empty.
     }
 
-    /**
-     * Returns a marker string for instance access.
-     * 
-     * <pre>
-     * Algorithm:
-     * 1) Return a stable literal value.
-     * 2) Keep the method side-effect free for deterministic tests.
-     * </pre>
-     *
-     * @return marker string
-     */
-    /* default */ String instanceMarker() {
-        return "instance";
-    }
 }

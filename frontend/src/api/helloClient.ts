@@ -145,7 +145,7 @@ export async function fetchHello(
 ): Promise<HelloResponse> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch('/api/hello', { signal: controller.signal });
@@ -171,6 +171,6 @@ export async function fetchHello(
       code: 'NETWORK_ERROR',
     });
   } finally {
-    window.clearTimeout(timeoutId);
+    globalThis.clearTimeout(timeoutId);
   }
 }

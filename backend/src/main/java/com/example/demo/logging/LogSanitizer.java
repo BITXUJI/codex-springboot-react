@@ -18,13 +18,13 @@ public final class LogSanitizer {
     /** JSON field matcher for sensitive keys. */
     private static final Pattern JSON_MASK = Pattern
             .compile("(?i)(\\\"(?:password|passwd|pwd|secret|token|access_token|refresh_token"
-                    + "|authorization|auth|apiKey|apikey|cardNumber|creditCard|ssn|idCard)"
+                    + "|authorization|auth|apiKey|cardNumber|creditCard|ssn|idCard)"
                     + "\\\"\\s*:\\s*\\\")([^\\\"]*)(\\\")");
 
     /** Form URL-encoded matcher for sensitive keys. */
     private static final Pattern FORM_MASK =
             Pattern.compile("(?i)\\b(password|passwd|pwd|secret|token|access_token|refresh_token"
-                    + "|authorization|auth|apiKey|apikey|cardNumber|creditCard|ssn|idCard)"
+                    + "|authorization|auth|apiKey|cardNumber|creditCard|ssn|idCard)"
                     + "=([^&\\s]+)");
 
     /** Header names that must be masked. */

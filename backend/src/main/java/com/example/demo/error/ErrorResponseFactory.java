@@ -61,11 +61,10 @@ public final class ErrorResponseFactory {
         body.setTraceId(resolveTraceId(request));
         body.setTimestamp(OffsetDateTime.now(ZoneOffset.UTC));
         body.setPath(request.getRequestURI());
-        if (details != null && details.getFieldErrors() != null
-                && !details.getFieldErrors().isEmpty()) {
-            body.setDetails(details);
-        } else if (details != null && details.getAdditionalProperties() != null
-                && !details.getAdditionalProperties().isEmpty()) {
+        if (details != null
+                && ((details.getFieldErrors() != null && !details.getFieldErrors().isEmpty())
+                        || (details.getAdditionalProperties() != null
+                                && !details.getAdditionalProperties().isEmpty()))) {
             body.setDetails(details);
         }
         return ResponseEntity.status(status).body(body);

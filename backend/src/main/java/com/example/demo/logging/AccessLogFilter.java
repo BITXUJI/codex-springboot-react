@@ -43,6 +43,9 @@ public class AccessLogFilter extends OncePerRequestFilter {
     /** Logger dedicated to access logs. */
     private static final Logger ACCESS_LOG = LoggerFactory.getLogger("ACCESS_LOG");
 
+    /** MDC key used to store and read trace id values. */
+    private static final String TRACE_ID_MDC_KEY = "traceId";
+
     /** Request/response header used for trace propagation. */
     private static final String TRACE_ID_HEADER = "X-Request-Id";
 
@@ -107,7 +110,7 @@ public class AccessLogFilter extends OncePerRequestFilter {
                 new ContentCachingResponseWrapper(response);
 
         final String traceId = resolveTraceId(requestWrapper);
-        MDC.put("traceId", traceId);
+        MDC.put(TRACE_ID_MDC_KEY, traceId);
         responseWrapper.setHeader(TRACE_ID_HEADER, traceId);
 
         final long startNanos = System.nanoTime();
@@ -160,7 +163,7 @@ public class AccessLogFilter extends OncePerRequestFilter {
         final Map<String, String> responseHeaders = sanitizeHeaders(response);
 
         if (ACCESS_LOG.isInfoEnabled()) {
-            ACCESS_LOG.info("access", keyValue("traceId", MDC.get("traceId")),
+            ACCESS_LOG.info("access", keyValue(TRACE_ID_MDC_KEY, MDC.get(TRACE_ID_MDC_KEY)),
                     keyValue("method", request.getMethod()),
                     keyValue("path", request.getRequestURI()),
                     keyValue("query", request.getQueryString()), keyValue("status", status),
