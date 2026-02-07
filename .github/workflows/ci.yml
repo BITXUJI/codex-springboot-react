@@ -155,11 +155,15 @@ jobs:
         run: ./gradlew javadoc
       - name: Build
         run: ./gradlew build
+      - name: Prepare Sonar backend dependencies
+        run: ./gradlew copySonarRuntimeLibraries
       - name: Prepare Sonar backend artifacts
         run: |
           mkdir -p ../output/sonar/backend/classes
+          mkdir -p ../output/sonar/backend/libs
           cp build/reports/jacoco/test/jacocoTestReport.xml ../output/sonar/backend/jacocoTestReport.xml
           cp -R build/classes/java/main ../output/sonar/backend/classes/main
+          cp build/sonar-libs/*.jar ../output/sonar/backend/libs/
       - name: Upload Sonar backend artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -167,6 +171,7 @@ jobs:
           path: |
             output/sonar/backend/jacocoTestReport.xml
             output/sonar/backend/classes/main
+            output/sonar/backend/libs
           if-no-files-found: error
           retention-days: 7
       - name: Dependency Check
@@ -214,9 +219,11 @@ jobs:
           mkdir -p frontend/coverage
           mkdir -p backend/build/reports/jacoco/test
           mkdir -p backend/build/classes/java
+          mkdir -p backend/build/sonar-libs
           cp output/sonar/frontend/lcov.info frontend/coverage/lcov.info
           cp output/sonar/backend/jacocoTestReport.xml backend/build/reports/jacoco/test/jacocoTestReport.xml
           cp -R output/sonar/backend/classes/main backend/build/classes/java/main
+          cp output/sonar/backend/libs/*.jar backend/build/sonar-libs/
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:

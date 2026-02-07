@@ -248,6 +248,15 @@ tasks.register('securityReport') {
     dependsOn 'dependencyCheckAnalyze', 'cyclonedxBom'
 }
 
+tasks.register('copySonarRuntimeLibraries', Copy) {
+    group = 'verification'
+    description = 'Copies runtime dependency JARs for Sonar Java analysis.'
+    from(sourceSets.main.runtimeClasspath) {
+        include '*.jar'
+    }
+    into layout.buildDirectory.dir('sonar-libs')
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
