@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.slf4j.spi.LoggingEventBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -163,23 +164,27 @@ public class AccessLogFilter extends OncePerRequestFilter {
         final Map<String, String> responseHeaders = sanitizeHeaders(response);
 
         if (ACCESS_LOG.isInfoEnabled()) {
-            ACCESS_LOG.info("access", keyValue(TRACE_ID_MDC_KEY, MDC.get(TRACE_ID_MDC_KEY)),
-                    keyValue("method", request.getMethod()),
-                    keyValue("path", request.getRequestURI()),
-                    keyValue("query", request.getQueryString()), keyValue("status", status),
-                    keyValue("durationMs", durationMs),
-                    keyValue("clientIp", resolveClientIp(request)),
-                    keyValue("remoteAddr", request.getRemoteAddr()),
-                    keyValue("userAgent", request.getHeader("User-Agent")),
-                    keyValue("requestHeaders", requestHeaders),
-                    keyValue("responseHeaders", responseHeaders),
-                    keyValue("requestBody", requestBody.body()),
-                    keyValue("responseBody", responseBody.body()),
-                    keyValue("requestBodyTruncated", requestBody.truncated()),
-                    keyValue("responseBodyTruncated", responseBody.truncated()),
-                    keyValue("requestBodyOmitted", requestBody.omitted()),
-                    keyValue("responseBodyOmitted", responseBody.omitted()),
-                    keyValue("exception", failure == null ? null : failure.getClass().getName()));
+            final LoggingEventBuilder logBuilder = ACCESS_LOG.atInfo()
+                    .addArgument(keyValue(TRACE_ID_MDC_KEY, MDC.get(TRACE_ID_MDC_KEY)))
+                    .addArgument(keyValue("method", request.getMethod()))
+                    .addArgument(keyValue("path", request.getRequestURI()))
+                    .addArgument(keyValue("query", request.getQueryString()))
+                    .addArgument(keyValue("status", status))
+                    .addArgument(keyValue("durationMs", durationMs))
+                    .addArgument(keyValue("clientIp", resolveClientIp(request)))
+                    .addArgument(keyValue("remoteAddr", request.getRemoteAddr()))
+                    .addArgument(keyValue("userAgent", request.getHeader("User-Agent")))
+                    .addArgument(keyValue("requestHeaders", requestHeaders))
+                    .addArgument(keyValue("responseHeaders", responseHeaders))
+                    .addArgument(keyValue("requestBody", requestBody.body()))
+                    .addArgument(keyValue("responseBody", responseBody.body()))
+                    .addArgument(keyValue("requestBodyTruncated", requestBody.truncated()))
+                    .addArgument(keyValue("responseBodyTruncated", responseBody.truncated()))
+                    .addArgument(keyValue("requestBodyOmitted", requestBody.omitted()))
+                    .addArgument(keyValue("responseBodyOmitted", responseBody.omitted()))
+                    .addArgument(keyValue("exception",
+                            failure == null ? null : failure.getClass().getName()));
+            logBuilder.log("access");
         }
     }
 
