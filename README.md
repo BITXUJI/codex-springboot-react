@@ -68,20 +68,21 @@ Generated artifacts are written to `output/playwright/`. In GitHub Actions, they
   - `SONAR_TOKEN`
 - Keep SonarCloud Automatic Analysis disabled to avoid duplicate analysis with CI-based scanning.
 
-### Locate project/issues with Playwright MCP
-- Recommended direct URL pattern: `https://sonarcloud.io/project/issues?id=<SONAR_PROJECT_KEY>`.
+### Confirm metrics/issues with SonarQube MCP
 - Current project key in this repo context: `BITXUJI_codex-springboot-react`.
-- Current issues page shortcut: `https://sonarcloud.io/project/issues?id=BITXUJI_codex-springboot-react`.
-- In Codex MCP, navigate directly with:
-  - `mcp__playwright__browser_navigate` to the issues URL above.
-  - `mcp__playwright__browser_wait_for` (2-3s) to let the project UI render.
-  - `mcp__playwright__browser_snapshot` to read summary and issue rows.
-- Key UI locators to verify you are on the correct project:
-  - Page title contains `Issues - codex-springboot-react`.
-  - Project id in URL query is `id=BITXUJI_codex-springboot-react`.
-  - Top summary shows issue count and effort (for example `7 issues`, `37min effort`).
-  - Left filter totals include `Reliability`, `Maintainability`, and `Security`.
-- If the key is unknown, first check GitHub repository variable `SONAR_PROJECT_KEY` used by CI, then open the same URL pattern.
+- Recommended branch for checks: `main`.
+- Coverage check (overall + new code):
+  - Call `mcp__sonarqube__get_component_measures` with metrics:
+    - `coverage`
+    - `line_coverage`
+    - `branch_coverage`
+    - `uncovered_lines`
+    - `new_coverage`
+    - `new_uncovered_lines`
+  - Call `mcp__sonarqube__get_project_quality_gate_status` to confirm quality gate and coverage condition status.
+- Issue check:
+  - Call `mcp__sonarqube__search_sonar_issues_in_projects` with `projects=["BITXUJI_codex-springboot-react"]`.
+- If the key is unknown, first check GitHub repository variable `SONAR_PROJECT_KEY`.
 
 ## Release publishing
 - Tag a release (e.g. `v1.0.0`) to trigger `.github/workflows/release.yml`.

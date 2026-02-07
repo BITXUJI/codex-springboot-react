@@ -29,11 +29,14 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`, `npm run test:e2e`
 
 ## SonarCloud lookup (MCP)
-- When the user asks to check SonarQube/SonarCloud issues, use Playwright MCP first.
-- Prefer direct issues URL: `https://sonarcloud.io/project/issues?id=<SONAR_PROJECT_KEY>`.
-- In this repo, the current key is `BITXUJI_codex-springboot-react`; direct URL is `https://sonarcloud.io/project/issues?id=BITXUJI_codex-springboot-react`.
-- Minimal flow: navigate to URL -> wait for render -> snapshot -> read total issues and each issue row (title, file, line, type, severity, status).
-- Verify target project by URL query `id=...` and page title containing project name.
+- When the user asks to check SonarQube/SonarCloud status, use SonarQube MCP tools directly (not Playwright).
+- In this repo, the current project key is `BITXUJI_codex-springboot-react` and branch is usually `main`.
+- Coverage confirmation flow:
+  - `mcp__sonarqube__get_component_measures` with `coverage`, `line_coverage`, `branch_coverage`, `uncovered_lines`, `new_coverage`.
+  - `mcp__sonarqube__get_project_quality_gate_status` to confirm gate/coverage condition status.
+- Issue lookup flow:
+  - `mcp__sonarqube__search_sonar_issues_in_projects` with `projects=["BITXUJI_codex-springboot-react"]`.
+- If user asks for exact issue rows, report title/key/file/line/severity/status from SonarQube MCP results.
 
 ## Commit gate
 - For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
