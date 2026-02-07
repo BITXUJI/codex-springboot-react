@@ -59,6 +59,15 @@ Generated artifacts are written to `output/playwright/`. In GitHub Actions, they
 - Combined security report task: `./gradlew securityReport`.
 - For faster Dependency-Check scans, set `NVD_API_KEY` (from the NVD API key portal) as an environment variable.
 
+## SonarCloud
+- CI uses a single SonarCloud project to scan both backend and frontend in one analysis.
+- Required repository variables:
+  - `SONAR_ORGANIZATION`
+  - `SONAR_PROJECT_KEY`
+- Required repository secret:
+  - `SONAR_TOKEN`
+- Keep SonarCloud Automatic Analysis disabled to avoid duplicate analysis with CI-based scanning.
+
 ## Release publishing
 - Tag a release (e.g. `v1.0.0`) to trigger `.github/workflows/release.yml`.
 - Frontend: builds `frontend/dist` and uploads `frontend-dist.zip` to the GitHub Release.
