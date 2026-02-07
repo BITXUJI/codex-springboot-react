@@ -28,6 +28,13 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 - Backend: `./gradlew javadoc` and `./gradlew build`
 - Frontend: `npm run dev` (smoke), `npm run build`, `npm run lint`, `npm run test:e2e`
 
+## SonarCloud lookup (MCP)
+- When the user asks to check SonarQube/SonarCloud issues, use Playwright MCP first.
+- Prefer direct issues URL: `https://sonarcloud.io/project/issues?id=<SONAR_PROJECT_KEY>`.
+- In this repo, the current key is `BITXUJI_codex-springboot-react`; direct URL is `https://sonarcloud.io/project/issues?id=BITXUJI_codex-springboot-react`.
+- Minimal flow: navigate to URL -> wait for render -> snapshot -> read total issues and each issue row (title, file, line, type, severity, status).
+- Verify target project by URL query `id=...` and page title containing project name.
+
 ## Commit gate
 - For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
 
