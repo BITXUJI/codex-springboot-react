@@ -40,6 +40,9 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 
 ## Commit gate
 - For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
+- Before `git commit` and `git push`, generate a change report and upload it to Obsidian.
+- In Obsidian, create (if missing) a folder named exactly as the project: `codex-springboot-react`.
+- Save each report in that folder with filename format: `<YYYY-MM-DD>-<summary>.md` (date first, then a short summary slug).
 
 ## Post-commit and post-push verification gate
 - After `git commit` and `git push`, always verify CI status first, then verify SonarCloud. Do not claim completion before both are confirmed.

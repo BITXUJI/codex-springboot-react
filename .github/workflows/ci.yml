@@ -155,6 +155,15 @@ jobs:
         run: ./gradlew javadoc
       - name: Build
         run: ./gradlew build
+      - name: License Report
+        run: ./gradlew generateLicenseReport
+      - name: Upload backend license report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: backend-license-report
+          path: backend/build/reports/dependency-license
+          if-no-files-found: error
+          retention-days: 7
       - name: Prepare Sonar backend dependencies
         run: ./gradlew copySonarRuntimeLibraries
       - name: Prepare Sonar backend artifacts
