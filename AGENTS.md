@@ -41,6 +41,17 @@ This repo is OpenAPI-first. Update `openapi/api.yml` before changing client or s
 ## Commit gate
 - For commits that touch frontend runtime/config behavior, run `cd frontend && npm run verify:precommit` before `git commit`.
 
+## Post-commit and post-push verification gate
+- After `git commit` and `git push`, always verify CI status first, then verify SonarCloud. Do not claim completion before both are confirmed.
+- GitHub confirmation flow:
+  - Confirm the latest pushed commit SHA on the target branch (usually `main`) with GitHub MCP.
+  - Confirm the CI workflow run for that SHA is `completed/success`.
+  - Confirm the `sonarqube` job inside that CI run is `completed/success`.
+- SonarCloud confirmation flow (after CI success):
+  - `mcp__sonarqube__search_sonar_issues_in_projects` with `projects=["BITXUJI_codex-springboot-react"]` and `branch="main"` to confirm target issues are closed.
+  - `mcp__sonarqube__get_project_quality_gate_status` to confirm gate is `OK`.
+  - `mcp__sonarqube__get_component_measures` with `coverage`, `line_coverage`, `branch_coverage`, `uncovered_lines`, `new_coverage` to confirm coverage-related conditions.
+
 ## Security tooling
 - Dependency vulnerability scan: `./gradlew dependencyCheckAnalyze`
 - CycloneDX SBOM: `./gradlew cyclonedxBom` or `./gradlew securityReport`

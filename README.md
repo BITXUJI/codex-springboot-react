@@ -84,6 +84,16 @@ Generated artifacts are written to `output/playwright/`. In GitHub Actions, they
   - Call `mcp__sonarqube__search_sonar_issues_in_projects` with `projects=["BITXUJI_codex-springboot-react"]`.
 - If the key is unknown, first check GitHub repository variable `SONAR_PROJECT_KEY`.
 
+### Post-commit and post-push verification habit
+Run this sequence after every commit push, and before reporting "done":
+1. Confirm GitHub CI for the pushed commit is finished and green.
+2. Confirm the `sonarqube` job in that CI run is `completed/success`.
+3. Confirm SonarCloud reflects the new analysis for `main`:
+   - `mcp__sonarqube__search_sonar_issues_in_projects` to verify the target issue is `CLOSED`.
+   - `mcp__sonarqube__get_project_quality_gate_status` to verify `OK`.
+   - `mcp__sonarqube__get_component_measures` for coverage metrics (`coverage`, `line_coverage`, `branch_coverage`, `uncovered_lines`, `new_coverage`).
+4. Only then confirm the change as complete.
+
 ## Release publishing
 - Tag a release (e.g. `v1.0.0`) to trigger `.github/workflows/release.yml`.
 - Frontend: builds `frontend/dist` and uploads `frontend-dist.zip` to the GitHub Release.
