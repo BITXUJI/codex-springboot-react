@@ -2,7 +2,7 @@
   "files.eol": "\n",
   // "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "java.format.settings.url": "./backend/config/formatter/formatter.xml",
   "java.format.settings.profile": "GoogleStyle",
@@ -26,5 +26,9 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "bitxuji",
+    "projectKey": "BITXUJI_codex-springboot-react"
   }
 }
