@@ -138,7 +138,7 @@ function buildErrorFromResponse(
  * @param response fetch response
  * @returns parsed payload or null
  */
-async function parseJsonSafely(response: Response): Promise<unknown | null> {
+async function parseJsonSafely(response: Response): Promise<unknown> {
   try {
     return await response.json();
   } catch {
