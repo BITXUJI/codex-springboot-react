@@ -7,6 +7,7 @@ import com.example.demo.model.ErrorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.http.MockHttpInputMessage;
@@ -120,6 +121,59 @@ class GlobalExceptionHandlerStatusTest {
         final ErrorResponse body = response.getBody();
         assertThat(body).isNotNull();
         assertThat(body.getMessage()).isEqualTo(HttpStatus.NOT_FOUND.getReasonPhrase());
+    }
+
+    /**
+     * Unknown 4xx status falls back safely.
+     *
+     * <pre>
+     * Theme: Exception mapping
+     * Test view: Unknown 4xx status falls back safely
+     * Test conditions: ResponseStatusException uses custom 499 status code
+     * Test result: Response uses BAD_REQUEST with BAD_REQUEST code
+     * </pre>
+     */
+    @Test
+    void handleResponseStatusHandlesUnknown4xxStatusCode() {
+        final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/hello");
+
+        final ResponseEntity<ErrorResponse> response = handler.handleResponseStatus(
+                new ResponseStatusException(HttpStatusCode.valueOf(499), "Client Closed Request"),
+                request);
+
+        final ErrorResponse body = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(body).isNotNull();
+        assertThat(body.getCode()).isEqualTo(ErrorCode.BAD_REQUEST.name());
+        assertThat(body.getMessage()).isEqualTo("Client Closed Request");
+    }
+
+    /**
+     * Unknown 5xx status falls back to internal error.
+     *
+     * <pre>
+     * Theme: Exception mapping
+     * Test view: Unknown 5xx status falls back to internal error
+     * Test conditions: ResponseStatusException uses custom 599 status code
+     * Test result: Response uses INTERNAL_SERVER_ERROR with INTERNAL_ERROR code
+     * </pre>
+     */
+    @Test
+    void handleResponseStatusHandlesUnknown5xxStatusCode() {
+        final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/hello");
+
+        final ResponseEntity<ErrorResponse> response = handler.handleResponseStatus(
+                new ResponseStatusException(HttpStatusCode.valueOf(599)), request);
+
+        final ErrorResponse body = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(body).isNotNull();
+        assertThat(body.getCode()).isEqualTo(ErrorCode.INTERNAL_ERROR.name());
+        assertThat(body.getMessage()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
     /**

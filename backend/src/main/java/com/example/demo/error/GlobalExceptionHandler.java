@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -137,10 +138,11 @@ public class GlobalExceptionHandler {
      * 
      * <pre>
      * Algorithm:
-     * 1) Convert status code value to HttpStatus.
-     * 2) Map status to API error code with ErrorResponseFactory.
-     * 3) Use explicit reason when present.
-     * 4) Fallback to the default reason phrase when reason is missing.
+     * 1) Resolve status code to HttpStatus when possible.
+     * 2) Fall back to BAD_REQUEST for unknown 4xx and INTERNAL_SERVER_ERROR otherwise.
+     * 3) Map status to API error code with ErrorResponseFactory.
+     * 4) Use explicit reason when present.
+     * 5) Fallback to the resolved status reason phrase when reason is missing.
      * </pre>
      *
      * @param exception response status exception
@@ -150,7 +152,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatus(
             final ResponseStatusException exception, final HttpServletRequest request) {
-        final HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
+        final HttpStatusCode statusCode = exception.getStatusCode();
+        HttpStatus status = HttpStatus.resolve(statusCode.value());
+        if (status == null) {
+            status = statusCode.is4xxClientError() ? HttpStatus.BAD_REQUEST
+                    : HttpStatus.INTERNAL_SERVER_ERROR;
+        }
         final ErrorCode code = ErrorResponseFactory.mapStatusToCode(status);
         final String message =
                 exception.getReason() == null ? status.getReasonPhrase() : exception.getReason();

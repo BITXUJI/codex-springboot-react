@@ -3,10 +3,14 @@ package com.example.demo.logging;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /** Tests for access-log filter execution behavior. */
 class AccessLogFilterFilterTest {
@@ -33,6 +37,12 @@ class AccessLogFilterFilterTest {
 
     /** HTTP POST method name. */
     private static final String METHOD_POST = "POST";
+
+    /** Clears MDC values after each test. */
+    @AfterEach
+    void tearDown() {
+        MDC.clear();
+    }
 
     /**
      * Incoming trace header is reused.
@@ -152,5 +162,77 @@ class AccessLogFilterFilterTest {
                 () -> filter.doFilterInternal(request, response, (req, res) -> {
                     throw new IllegalStateException("boom");
                 }), "Runtime exceptions should bubble up");
+    }
+
+    /**
+     * Runtime failures are passed to access logging.
+     *
+     * <pre>
+     * Theme: Error propagation
+     * Test view: Runtime failures are passed to access logging
+     * Test conditions: Filter chain throws runtime exception
+     * Test result: logAccess receives the runtime failure instance
+     * </pre>
+     */
+    @Test
+    void doFilterInternalCapturesRuntimeFailureForLogging() {
+        final CapturingAccessLogFilter filter = new CapturingAccessLogFilter();
+        final MockHttpServletRequest request = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        final MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> filter.doFilterInternal(request, response, (req, res) -> {
+                    throw new IllegalStateException("boom");
+                }), "Runtime exceptions should bubble up");
+        Assertions.assertInstanceOf(ServletException.class, filter.capturedFailure,
+                "Runtime failure should still be represented for logging");
+    }
+
+    /**
+     * Existing MDC values are restored after filtering.
+     *
+     * <pre>
+     * Theme: MDC context management
+     * Test view: Existing MDC values are restored after filtering
+     * Test conditions: MDC has pre-existing keys before filter execution
+     * Test result: Existing keys remain after filter cleanup
+     * </pre>
+     */
+    @Test
+    void doFilterInternalRestoresExistingMdcContext() throws IOException, ServletException {
+        final AccessLogFilter filter = new AccessLogFilter();
+        final MockHttpServletRequest request = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        final MockHttpServletResponse response = new MockHttpServletResponse();
+        MDC.put("userId", "u-1");
+        MDC.put("traceId", "old-trace");
+
+        filter.doFilterInternal(request, response, (req, res) -> res.getOutputStream()
+                .write(RESPONSE_BODY.getBytes(StandardCharsets.UTF_8)));
+
+        Assertions.assertEquals("u-1", MDC.get("userId"),
+                "Existing MDC userId should be preserved");
+        Assertions.assertEquals("old-trace", MDC.get("traceId"),
+                "Existing MDC traceId should be restored");
+    }
+
+    /**
+     * Test helper that captures failures passed to logAccess.
+     *
+     * <pre>
+     * Responsibilities:
+     * 1) Override logAccess to observe the failure argument.
+     * 2) Avoid changing production behavior in tested code paths.
+     * </pre>
+     */
+    private static final class CapturingAccessLogFilter extends AccessLogFilter {
+        /** Captured failure from logAccess. */
+        private Exception capturedFailure;
+
+        @Override
+        protected void logAccess(final ContentCachingRequestWrapper request,
+                final ContentCachingResponseWrapper response, final long durationMs,
+                final Exception failure) {
+            capturedFailure = failure;
+        }
     }
 }

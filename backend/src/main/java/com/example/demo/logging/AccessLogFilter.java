@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
@@ -91,8 +93,9 @@ public class AccessLogFilter extends OncePerRequestFilter {
      * Algorithm:
      * 1) Wrap request/response with content-caching wrappers.
      * 2) Resolve trace ID, bind it to MDC, and write it to response headers.
-     * 3) Execute downstream filter chain and capture raised IO/Servlet exceptions.
-     * 4) Log access details, clear MDC, and copy cached response body back.
+     * 3) Execute downstream filter chain and capture raised checked exceptions.
+     * 4) Log access details and restore previous MDC context.
+     * 5) Copy cached response body back to the client.
      * </pre>
      *
      * @param request current request
@@ -110,21 +113,31 @@ public class AccessLogFilter extends OncePerRequestFilter {
         final ContentCachingResponseWrapper responseWrapper =
                 new ContentCachingResponseWrapper(response);
 
+        final Map<String, String> priorMdc = MDC.getCopyOfContextMap();
         final String traceId = resolveTraceId(requestWrapper);
         MDC.put(TRACE_ID_MDC_KEY, traceId);
         responseWrapper.setHeader(TRACE_ID_HEADER, traceId);
 
         final long startNanos = System.nanoTime();
         Exception failure = null;
+        boolean completed = false;
         try {
             filterChain.doFilter(requestWrapper, responseWrapper);
+            completed = true;
         } catch (final IOException | ServletException ex) {
             failure = ex;
             throw ex;
         } finally {
+            if (!completed && failure == null) {
+                failure = new ServletException("Request failed before completion");
+            }
             final long durationMs = Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
             logAccess(requestWrapper, responseWrapper, durationMs, failure);
-            MDC.clear();
+            if (priorMdc == null) {
+                MDC.clear();
+            } else {
+                MDC.setContextMap(priorMdc);
+            }
             responseWrapper.copyBodyToResponse();
         }
     }
@@ -216,7 +229,7 @@ public class AccessLogFilter extends OncePerRequestFilter {
      * <pre>
      * Algorithm:
      * 1) Start with request.getRemoteAddr() as fallback.
-     * 2) If X-Forwarded-For exists, take the first comma-separated value.
+     * 2) Parse X-Forwarded-For only when remote address is a local proxy range.
      * 3) Return the resolved client-facing IP value.
      * </pre>
      *
@@ -226,7 +239,18 @@ public class AccessLogFilter extends OncePerRequestFilter {
     protected static String resolveClientIp(final HttpServletRequest request) {
         String clientIp = request.getRemoteAddr();
         final String forwarded = request.getHeader("X-Forwarded-For");
-        if (StringUtils.hasText(forwarded)) {
+        final String remoteAddr = request.getRemoteAddr();
+        boolean trustedProxy = false;
+        if (StringUtils.hasText(remoteAddr)) {
+            try {
+                final InetAddress address = InetAddress.getByName(remoteAddr);
+                trustedProxy = address.isLoopbackAddress() || address.isSiteLocalAddress()
+                        || address.isLinkLocalAddress();
+            } catch (final UnknownHostException ex) {
+                trustedProxy = false;
+            }
+        }
+        if (StringUtils.hasText(forwarded) && trustedProxy) {
             final int commaIndex = forwarded.indexOf(',');
             clientIp =
                     commaIndex > 0 ? forwarded.substring(0, commaIndex).trim() : forwarded.trim();

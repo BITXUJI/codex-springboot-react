@@ -79,4 +79,107 @@ class AccessLogFilterClientIpTest {
                 AccessLogFilter.resolveClientIp(direct),
                 "Remote address should be used when no forwarded header exists");
     }
+
+    /**
+     * Untrusted remote ignores forwarded IP.
+     *
+     * <pre>
+     * Theme: Client IP resolution
+     * Test view: Untrusted remote ignores forwarded IP
+     * Test conditions: Public remote address sends X-Forwarded-For
+     * Test result: Remote address is returned
+     * </pre>
+     */
+    @Test
+    void resolveClientIpIgnoresForwardedForUntrustedRemote() {
+        final MockHttpServletRequest direct = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        direct.setRemoteAddr(String.format(IP_FORMAT, 198, 51, 100, 10));
+        direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 9));
+
+        Assertions.assertEquals(String.format(IP_FORMAT, 198, 51, 100, 10),
+                AccessLogFilter.resolveClientIp(direct),
+                "Forwarded header should be ignored for untrusted remote addresses");
+    }
+
+    /**
+     * Invalid remote address ignores forwarded IP.
+     *
+     * <pre>
+     * Theme: Client IP resolution
+     * Test view: Invalid remote address ignores forwarded IP
+     * Test conditions: Remote address is unresolvable and X-Forwarded-For exists
+     * Test result: Original remote value is returned
+     * </pre>
+     */
+    @Test
+    void resolveClientIpIgnoresForwardedWhenRemoteInvalid() {
+        final MockHttpServletRequest direct = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        direct.setRemoteAddr("invalid host");
+        direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 10));
+
+        Assertions.assertEquals("invalid host", AccessLogFilter.resolveClientIp(direct),
+                "Forwarded header should be ignored when remote address is invalid");
+    }
+
+    /**
+     * Blank remote address ignores forwarded IP.
+     *
+     * <pre>
+     * Theme: Client IP resolution
+     * Test view: Blank remote address ignores forwarded IP
+     * Test conditions: Remote address is blank and X-Forwarded-For exists
+     * Test result: Blank remote value is returned
+     * </pre>
+     */
+    @Test
+    void resolveClientIpIgnoresForwardedWhenRemoteBlank() {
+        final MockHttpServletRequest direct = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        direct.setRemoteAddr("");
+        direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 11));
+
+        Assertions.assertEquals("", AccessLogFilter.resolveClientIp(direct),
+                "Forwarded header should be ignored when remote address is blank");
+    }
+
+    /**
+     * Loopback remote accepts forwarded IP.
+     *
+     * <pre>
+     * Theme: Client IP resolution
+     * Test view: Loopback remote accepts forwarded IP
+     * Test conditions: Remote address is loopback and X-Forwarded-For exists
+     * Test result: Forwarded client IP is returned
+     * </pre>
+     */
+    @Test
+    void resolveClientIpUsesForwardedForLoopbackProxy() {
+        final MockHttpServletRequest forwarded = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        forwarded.setRemoteAddr(String.format(IP_FORMAT, 127, 0, 0, 1));
+        forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 12));
+
+        Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 12),
+                AccessLogFilter.resolveClientIp(forwarded),
+                "Forwarded IP should be used for loopback proxy addresses");
+    }
+
+    /**
+     * Link-local remote accepts forwarded IP.
+     *
+     * <pre>
+     * Theme: Client IP resolution
+     * Test view: Link-local remote accepts forwarded IP
+     * Test conditions: Remote address is link-local and X-Forwarded-For exists
+     * Test result: Forwarded client IP is returned
+     * </pre>
+     */
+    @Test
+    void resolveClientIpUsesForwardedForLinkLocalProxy() {
+        final MockHttpServletRequest forwarded = new MockHttpServletRequest(METHOD_GET, PATH_API);
+        forwarded.setRemoteAddr(String.format(IP_FORMAT, 169, 254, 1, 10));
+        forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 13));
+
+        Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 13),
+                AccessLogFilter.resolveClientIp(forwarded),
+                "Forwarded IP should be used for link-local proxy addresses");
+    }
 }
