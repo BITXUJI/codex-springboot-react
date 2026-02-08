@@ -1,15 +1,15 @@
 package com.example.demo;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -44,7 +44,7 @@ class HelloControllerTest {
      */
     @Test
     void returnsHelloMessage() throws Exception {
-        assertThat(mockMvc).isNotNull();
+        Assertions.assertThat(mockMvc).isNotNull();
         mockMvc.perform(get("/api/hello")).andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"Hello from Spring Boot\"}"));
     }
@@ -56,10 +56,11 @@ class HelloControllerTest {
      */
     @Test
     void returnsNotFoundForUnknownApiPath() throws Exception {
-        assertThat(mockMvc).isNotNull();
+        Assertions.assertThat(mockMvc).isNotNull();
         mockMvc.perform(get("/api/e2e-not-found-example")).andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Not found"))
-                .andExpect(jsonPath("$.path").value("/api/e2e-not-found-example"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Not found"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.path")
+                        .value("/api/e2e-not-found-example"));
     }
 }

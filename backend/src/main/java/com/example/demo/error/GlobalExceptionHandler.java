@@ -186,7 +186,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles missing resource mappings that Spring exposes as NoResourceFoundException.
+     * Handles missing resource mappings from NoResourceFoundException.
      * 
      * <pre>
      * Algorithm:
