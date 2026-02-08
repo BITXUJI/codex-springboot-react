@@ -94,6 +94,33 @@ describe('fetchHello', () => {
   });
 
   /**
+   * Invalid JSON payloads still keep HTTP error semantics.
+   *
+   * <pre>
+   * Theme: API errors
+   * Test view: Invalid JSON payloads still keep HTTP error semantics
+   * Test conditions: Non-ok response advertises JSON but parsing throws
+   * Test result: Error message includes HTTP status
+   * </pre>
+   */
+  it('falls back to HTTP error when error payload JSON cannot be parsed', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      headers: {
+        get: (name: string) =>
+          name === 'content-type' ? 'application/json' : null,
+      },
+      json: async () => {
+        throw new SyntaxError('Unexpected token');
+      },
+    });
+    global.fetch = fetchMock as typeof fetch;
+
+    await expect(fetchHello()).rejects.toThrow('Request failed: 502');
+  });
+
+  /**
    * Header trace id is used when payload is blank.
    *
    * <pre>

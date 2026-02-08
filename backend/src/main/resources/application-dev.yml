@@ -3,3 +3,9 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+app:
+  logging:
+    access:
+      capture-request-body: true
+      capture-response-body: true

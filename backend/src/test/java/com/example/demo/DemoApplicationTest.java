@@ -58,6 +58,5 @@ class DemoApplicationTest {
                 lookup.findConstructor(DemoApplication.class, MethodType.methodType(void.class));
         final DemoApplication instance = (DemoApplication) constructor.invoke();
         assertThat(instance).as(caseName).isNotNull();
-        assertThat(DemoApplication.INSTANCE_MARKER).as(caseName).isEqualTo("instance");
     }
 }

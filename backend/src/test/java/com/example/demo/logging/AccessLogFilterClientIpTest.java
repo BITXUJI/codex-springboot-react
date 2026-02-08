@@ -31,7 +31,7 @@ class AccessLogFilterClientIpTest {
     @Test
     void resolveClientIpForwardedCommaReturnsFirst() {
         final MockHttpServletRequest forwarded = new MockHttpServletRequest(METHOD_GET, PATH_API);
-        forwarded.setRemoteAddr(String.format(IP_FORMAT, 10, 0, 0, 1));
+        forwarded.setRemoteAddr(String.format(IP_FORMAT, 127, 0, 0, 1));
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 1) + ", "
                 + String.format(IP_FORMAT, 70, 0, 0, 1));
 
@@ -52,7 +52,7 @@ class AccessLogFilterClientIpTest {
     @Test
     void resolveClientIpForwardedSingleReturnsValue() {
         final MockHttpServletRequest forwarded = new MockHttpServletRequest(METHOD_GET, PATH_API);
-        forwarded.setRemoteAddr(String.format(IP_FORMAT, 10, 0, 0, 3));
+        forwarded.setRemoteAddr(String.format(IP_FORMAT, 127, 0, 0, 1));
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 2));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 2),
@@ -173,13 +173,13 @@ class AccessLogFilterClientIpTest {
      * </pre>
      */
     @Test
-    void resolveClientIpUsesForwardedForLinkLocalProxy() {
+    void resolveClientIpIgnoresForwardedForLinkLocalRemoteByDefault() {
         final MockHttpServletRequest forwarded = new MockHttpServletRequest(METHOD_GET, PATH_API);
         forwarded.setRemoteAddr(String.format(IP_FORMAT, 169, 254, 1, 10));
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 13));
 
-        Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 13),
+        Assertions.assertEquals(String.format(IP_FORMAT, 169, 254, 1, 10),
                 AccessLogSupport.resolveClientIp(forwarded),
-                "Forwarded IP should be used for link-local proxy addresses");
+                "Forwarded header should be ignored unless proxy is explicitly trusted");
     }
 }

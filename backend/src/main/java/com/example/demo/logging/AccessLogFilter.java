@@ -9,11 +9,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.LoggingEventBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -41,6 +43,67 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     /** Paths that should not emit access logs. */
     private static final String[] SKIP_PATHS = {"/actuator", "/health"};
+
+    /** Default trusted proxy list when configuration is absent. */
+    private static final String TRUSTED_PROXIES = "127.0.0.1,::1,0:0:0:0:0:0:0:1";
+
+    /** Trusted proxy addresses allowed to forward client IP headers. */
+    private Set<String> trustedProxies = AccessLogClientIpResolver.defaultTrustedProxyAddresses();
+
+    /** Whether request payload logging is enabled. */
+    private boolean reqBodyCapture;
+
+    /** Whether response payload logging is enabled. */
+    private boolean resBodyCapture;
+
+    /**
+     * Configures trusted proxy addresses.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read comma-separated proxy addresses from configuration.
+     * 2) Parse and normalize entries.
+     * 3) Update trustedProxies with parsed values.
+     * </pre>
+     *
+     * @param trustedProxies comma-separated proxy addresses
+     */
+    @Value("${app.logging.access.trusted-proxies:" + TRUSTED_PROXIES + "}")
+    /* default */ void setTrustedProxies(final String trustedProxies) {
+        this.trustedProxies = AccessLogClientIpResolver.parseTrustedProxyAddresses(trustedProxies);
+    }
+
+    /**
+     * Configures request body capture.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read boolean flag from configuration.
+     * 2) Update reqBodyCapture toggle.
+     * </pre>
+     *
+     * @param enabled whether request body capture is enabled
+     */
+    @Value("${app.logging.access.capture-request-body:false}")
+    /* default */ void setCaptureRequestBody(final boolean enabled) {
+        reqBodyCapture = enabled;
+    }
+
+    /**
+     * Configures response body capture.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Read boolean flag from configuration.
+     * 2) Update resBodyCapture toggle.
+     * </pre>
+     *
+     * @param enabled whether response body capture is enabled
+     */
+    @Value("${app.logging.access.capture-response-body:false}")
+    /* default */ void setCaptureResponseBody(final boolean enabled) {
+        resBodyCapture = enabled;
+    }
 
     /**
      * Determines whether the current request should skip logging.
@@ -143,10 +206,10 @@ public class AccessLogFilter extends OncePerRequestFilter {
     protected void logAccess(final ContentCachingRequestWrapper request,
             final ContentCachingResponseWrapper response, final long durationMs,
             final Exception failure) {
-        final AccessLogSupport.BodyCapture requestBody = AccessLogSupport
-                .captureBody(request.getContentAsByteArray(), request.getContentType());
-        final AccessLogSupport.BodyCapture responseBody = AccessLogSupport
-                .captureBody(response.getContentAsByteArray(), response.getContentType());
+        final AccessLogSupport.BodyCapture requestBody = AccessLogBodyCaptureSupport.captureBody(
+                request.getContentAsByteArray(), request.getContentType(), reqBodyCapture);
+        final AccessLogSupport.BodyCapture responseBody = AccessLogBodyCaptureSupport.captureBody(
+                response.getContentAsByteArray(), response.getContentType(), resBodyCapture);
 
         int status = response.getStatus();
         if (failure != null && status < 400) {
@@ -164,7 +227,8 @@ public class AccessLogFilter extends OncePerRequestFilter {
                             keyValue("query", LogSanitizer.sanitizeQuery(request.getQueryString())))
                     .addArgument(keyValue("status", status))
                     .addArgument(keyValue("durationMs", durationMs))
-                    .addArgument(keyValue("clientIp", AccessLogSupport.resolveClientIp(request)))
+                    .addArgument(keyValue("clientIp",
+                            AccessLogClientIpResolver.resolveClientIp(request, trustedProxies)))
                     .addArgument(keyValue("remoteAddr", request.getRemoteAddr()))
                     .addArgument(keyValue("userAgent", request.getHeader("User-Agent")))
                     .addArgument(keyValue("requestHeaders", requestHeaders))

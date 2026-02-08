@@ -127,6 +127,26 @@ function buildErrorFromResponse(
 }
 
 /**
+ * Safely parses JSON payloads and falls back to null on parse errors.
+ * <pre>
+ * Algorithm:
+ * 1) Attempt response.json() for JSON responses.
+ * 2) Return parsed payload when successful.
+ * 3) Return null when JSON parsing fails.
+ * </pre>
+ *
+ * @param response fetch response
+ * @returns parsed payload or null
+ */
+async function parseJsonSafely(response: Response): Promise<unknown | null> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Loads the hello message from the backend.
  * <pre>
  * Algorithm:
@@ -153,7 +173,9 @@ export async function fetchHello(
       const traceId = response.headers.get(TRACE_ID_HEADER);
       const contentType = response.headers.get('content-type') ?? '';
       const payload =
-        contentType.includes('application/json') ? await response.json() : null;
+        contentType.includes('application/json')
+          ? await parseJsonSafely(response)
+          : null;
       throw buildErrorFromResponse(response.status, payload, traceId);
     }
     return (await response.json()) as HelloResponse;

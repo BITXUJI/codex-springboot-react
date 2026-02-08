@@ -25,16 +25,12 @@ function collectPageIssues(page: Page) {
   return { consoleErrors, pageErrors, failedRequests };
 }
 
-function observeClientRuntimeFailures(page: Page) {
-  return collectPageIssues(page);
-}
-
 test('renders hello message without browser/runtime failures', async ({ page }) => {
   const outputRoot = path.resolve(process.cwd(), '..', 'output', 'playwright');
   const snapshotDir = path.join(outputRoot, 'snapshots');
   const screenshotPath = path.join(snapshotDir, 'home.png');
   const summaryPath = path.join(outputRoot, 'home-summary.json');
-  const diagnostics = observeClientRuntimeFailures(page);
+  const diagnostics = collectPageIssues(page);
 
   const documentResponse = await page.goto('/');
   expect(documentResponse).not.toBeNull();
@@ -77,7 +73,7 @@ test('renders hello message without browser/runtime failures', async ({ page }) 
 });
 
 test('shows backend message when /api/hello returns structured 404 error', async ({ page }) => {
-  const diagnostics = observeClientRuntimeFailures(page);
+  const diagnostics = collectPageIssues(page);
   await page.route('**/api/hello', async (route) => {
     await route.fulfill({
       status: 404,
@@ -104,7 +100,7 @@ test('shows backend message when /api/hello returns structured 404 error', async
 });
 
 test('falls back to generic HTTP message for non-JSON error payload', async ({ page }) => {
-  const diagnostics = observeClientRuntimeFailures(page);
+  const diagnostics = collectPageIssues(page);
   await page.route('**/api/hello', async (route) => {
     await route.fulfill({
       status: 502,

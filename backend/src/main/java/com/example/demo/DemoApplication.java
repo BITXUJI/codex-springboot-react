@@ -11,19 +11,12 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Responsibilities:
  * 1) Bootstraps the Spring application.
  * 2) Supports opt-in exit-on-start mode for smoke runs.
- * 3) Stores the last started context for test visibility.
+ * 3) Stores the last started context for lifecycle visibility.
  * </pre>
  */
 @SpringBootApplication
 public final class DemoApplication {
-    /**
-     * Stable marker value used by tests that verify instance creation.
-     */
-    /* default */ static final String INSTANCE_MARKER = "instance";
-
-    /**
-     * Tracks the most recently started application context (primarily for tests).
-     */
+    /** Tracks the most recently started application context. */
     private static ConfigurableApplicationContext lastContext;
 
     /**
@@ -54,8 +47,7 @@ public final class DemoApplication {
      * <pre>
      * Algorithm:
      * 1) Delegate startup to SpringApplication.run.
-     * 2) Cache the returned context in lastContext.
-     * 3) Return the context so callers can manage lifecycle if needed.
+     * 2) Cache and return the started context.
      * </pre>
      *
      * @param args command-line arguments
@@ -92,8 +84,5 @@ public final class DemoApplication {
      * 2) A private constructor prevents accidental object creation.
      * </pre>
      */
-    private DemoApplication() {
-        // Intentionally empty.
-    }
-
+    private DemoApplication() {}
 }

@@ -6,3 +6,10 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+app:
+  logging:
+    access:
+      capture-request-body: false
+      capture-response-body: false
+      trusted-proxies: 127.0.0.1,::1,0:0:0:0:0:0:0:1

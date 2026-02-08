@@ -134,4 +134,62 @@ class AccessLogFilterBodyCaptureTest {
         Assertions.assertEquals(Boolean.TRUE, capture.omitted(),
                 "Bodies without content type should be omitted");
     }
+
+    /**
+     * Body capture can be disabled by policy.
+     *
+     * <pre>
+     * Theme: Body capture
+     * Test view: Body capture can be disabled by policy
+     * Test conditions: Non-empty text body with capture disabled
+     * Test result: Body is omitted even for text payloads
+     * </pre>
+     */
+    @Test
+    void captureBodyDisabledByPolicyIsOmitted() {
+        final byte[] body = "hello".getBytes(StandardCharsets.UTF_8);
+        final AccessLogSupport.BodyCapture capture =
+                AccessLogSupport.captureBody(body, CT_TEXT_UTF8, false);
+
+        Assertions.assertEquals(Boolean.TRUE, capture.omitted(),
+                "Disabled body capture should mark payloads as omitted");
+    }
+
+    /**
+     * Disabled policy keeps empty bodies as non-omitted.
+     *
+     * <pre>
+     * Theme: Body capture
+     * Test view: Disabled policy keeps empty bodies as non-omitted
+     * Test conditions: Empty payload with capture disabled
+     * Test result: Omitted flag remains false
+     * </pre>
+     */
+    @Test
+    void captureBodyDisabledWithEmptyPayloadIsNotOmitted() {
+        final AccessLogSupport.BodyCapture capture =
+                AccessLogSupport.captureBody(new byte[0], CT_TEXT_UTF8, false);
+
+        Assertions.assertEquals(Boolean.FALSE, capture.omitted(),
+                "Empty payloads should remain non-omitted when capture is disabled");
+    }
+
+    /**
+     * Disabled policy keeps null bodies as non-omitted.
+     *
+     * <pre>
+     * Theme: Body capture
+     * Test view: Disabled policy keeps null bodies as non-omitted
+     * Test conditions: Null payload with capture disabled
+     * Test result: Omitted flag remains false
+     * </pre>
+     */
+    @Test
+    void captureBodyDisabledWithNullPayloadIsNotOmitted() {
+        final AccessLogSupport.BodyCapture capture =
+                AccessLogSupport.captureBody(null, CT_TEXT_UTF8, false);
+
+        Assertions.assertEquals(Boolean.FALSE, capture.omitted(),
+                "Null payloads should remain non-omitted when capture is disabled");
+    }
 }

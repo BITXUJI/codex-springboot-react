@@ -246,4 +246,5 @@ class GlobalExceptionHandlerStatusTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

@@ -7,6 +7,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    /** Logger for exception handling diagnostics. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     /**
      * Handles domain exceptions with an explicit status.
      * 
@@ -240,6 +245,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnhandled(final Exception exception,
             final HttpServletRequest request) {
+        final String traceId = ErrorResponseFactory.resolveTraceId(request);
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("Unhandled exception traceId={} path={}", traceId, request.getRequestURI(),
+                    exception);
+        }
         return ErrorResponseFactory.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
                 ErrorCode.INTERNAL_ERROR.name(), "Unexpected error", null, request);
     }

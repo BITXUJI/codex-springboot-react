@@ -2,14 +2,7 @@ package com.example.demo.logging;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Enumeration;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,9 +13,9 @@ import org.springframework.util.StringUtils;
  * 
  * <pre>
  * Responsibilities:
- * 1) Resolve trace id and client IP metadata for access logs.
- * 2) Sanitize headers and payload bodies before they are logged.
- * 3) Apply consistent text/binary detection and charset handling.
+ * 1) Resolve trace id and sanitize request/response headers.
+ * 2) Delegate payload capture and client IP resolution to focused helpers.
+ * 3) Expose shared constants and body-capture data contracts.
  * </pre>
  */
 final class AccessLogSupport {
@@ -71,7 +64,7 @@ final class AccessLogSupport {
      * <pre>
      * Algorithm:
      * 1) Start with request.getRemoteAddr() as fallback.
-     * 2) Parse X-Forwarded-For only when remote address is a local proxy range.
+     * 2) Parse X-Forwarded-For only when remote address is in default trusted proxies.
      * 3) Return the resolved client-facing IP value.
      * </pre>
      *
@@ -79,25 +72,8 @@ final class AccessLogSupport {
      * @return client IP
      */
     /* default */ static String resolveClientIp(final HttpServletRequest request) {
-        String clientIp = request.getRemoteAddr();
-        final String forwarded = request.getHeader("X-Forwarded-For");
-        final String remoteAddr = request.getRemoteAddr();
-        boolean trustedProxy = false;
-        if (StringUtils.hasText(remoteAddr)) {
-            try {
-                final InetAddress address = InetAddress.getByName(remoteAddr);
-                trustedProxy = address.isLoopbackAddress() || address.isSiteLocalAddress()
-                        || address.isLinkLocalAddress();
-            } catch (final UnknownHostException ex) {
-                trustedProxy = false;
-            }
-        }
-        if (StringUtils.hasText(forwarded) && trustedProxy) {
-            final int commaIndex = forwarded.indexOf(',');
-            clientIp =
-                    commaIndex > 0 ? forwarded.substring(0, commaIndex).trim() : forwarded.trim();
-        }
-        return clientIp;
+        return AccessLogClientIpResolver.resolveClientIp(request,
+                AccessLogClientIpResolver.defaultTrustedProxyAddresses());
     }
 
     /**
@@ -167,22 +143,26 @@ final class AccessLogSupport {
      * @return captured body metadata
      */
     /* default */ static BodyCapture captureBody(final byte[] bodyBytes, final String contentType) {
-        BodyCapture capture = new BodyCapture(null, false, false);
-        if (bodyBytes != null && bodyBytes.length > 0) {
-            if (isTextLike(contentType)) {
-                final Charset charset = resolveCharset(contentType);
-                String body = new String(bodyBytes, charset);
-                body = LogSanitizer.sanitizeBody(body, contentType);
-                final boolean truncated = body.length() > MAX_BODY_BYTES;
-                if (truncated) {
-                    body = body.substring(0, MAX_BODY_BYTES);
-                }
-                capture = new BodyCapture(body, truncated, false);
-            } else {
-                capture = new BodyCapture(null, false, true);
-            }
-        }
-        return capture;
+        return captureBody(bodyBytes, contentType, true);
+    }
+
+    /**
+     * Captures and truncates payload body with a policy toggle.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Return an omitted capture when policy disables body logging.
+     * 2) Otherwise delegate to AccessLogBodyCaptureSupport.captureBody(...).
+     * </pre>
+     *
+     * @param bodyBytes raw body bytes
+     * @param contentType content type header
+     * @param captureEnabled whether payload logging is enabled
+     * @return captured body metadata
+     */
+    /* default */ static BodyCapture captureBody(final byte[] bodyBytes, final String contentType,
+            final boolean captureEnabled) {
+        return AccessLogBodyCaptureSupport.captureBody(bodyBytes, contentType, captureEnabled);
     }
 
     /**
@@ -190,24 +170,15 @@ final class AccessLogSupport {
      * 
      * <pre>
      * Algorithm:
-     * 1) Treat null content type as non-text to avoid accidental secret leaks.
-     * 2) Normalize value to lowercase.
-     * 3) Accept text/*, JSON, XML, and form-url-encoded content types.
+     * 1) Delegate content-type classification to AccessLogBodyCaptureSupport.
+     * 2) Return true only for text-like content types.
      * </pre>
      *
      * @param contentType content type header
      * @return true if text-like
      */
     /* default */ static boolean isTextLike(final String contentType) {
-        boolean textLike = false;
-        if (contentType != null) {
-            final String normalized = contentType.toLowerCase(Locale.ROOT);
-            textLike = normalized.startsWith("text/") || normalized.contains("application/json")
-                    || normalized.contains("+json") || normalized.contains("application/xml")
-                    || normalized.contains("+xml")
-                    || normalized.contains("application/x-www-form-urlencoded");
-        }
-        return textLike;
+        return AccessLogBodyCaptureSupport.isTextLike(contentType);
     }
 
     /**
@@ -215,33 +186,15 @@ final class AccessLogSupport {
      * 
      * <pre>
      * Algorithm:
-     * 1) Default to UTF-8.
-     * 2) Extract charset=... token when provided.
-     * 3) Resolve with Charset.forName and fallback to UTF-8 on invalid values.
+     * 1) Delegate charset parsing to AccessLogBodyCaptureSupport.
+     * 2) Return UTF-8 fallback when parsing fails or charset is missing.
      * </pre>
      *
      * @param contentType content type header
      * @return charset to decode with
      */
-    /* default */ static Charset resolveCharset(final String contentType) {
-        Charset resolved = StandardCharsets.UTF_8;
-        String normalized = null;
-        if (contentType != null) {
-            normalized = contentType.toLowerCase(Locale.ROOT);
-        }
-        final int charsetIndex = normalized == null ? -1 : normalized.indexOf("charset=");
-        String charset = null;
-        if (charsetIndex >= 0) {
-            charset = normalized.substring(charsetIndex + "charset=".length()).trim();
-        }
-        if (charset != null) {
-            try {
-                resolved = Charset.forName(charset);
-            } catch (final IllegalCharsetNameException | UnsupportedCharsetException ex) {
-                resolved = StandardCharsets.UTF_8;
-            }
-        }
-        return resolved;
+    /* default */ static java.nio.charset.Charset resolveCharset(final String contentType) {
+        return AccessLogBodyCaptureSupport.resolveCharset(contentType);
     }
 
     /**
