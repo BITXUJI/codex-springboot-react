@@ -3,79 +3,97 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
-  "/api/hello": {
-    /** Say hello */
-    get: operations["getHello"];
-  };
+    "/api/hello": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Say hello */
+        get: operations["getHello"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
-  schemas: {
-    HelloResponse: {
-      /** @example Hello from Spring Boot */
-      message: string;
+    schemas: {
+        HelloResponse: {
+            /** @example Hello from Spring Boot */
+            message: string;
+        };
+        ErrorResponse: {
+            /** @example INTERNAL_ERROR */
+            code: string;
+            /** @example Unexpected error */
+            message: string;
+            /** @example 2b6b8b22-9b31-4c96-8a22-f6a2d2e4c1c4 */
+            traceId: string;
+            details?: components["schemas"]["ErrorDetails"];
+            /**
+             * Format: date-time
+             * @example 2026-02-01T12:34:56Z
+             */
+            timestamp: string;
+            /** @example /api/hello */
+            path: string;
+        };
+        ErrorDetails: {
+            fieldErrors?: components["schemas"]["FieldError"][];
+        } & {
+            [key: string]: unknown;
+        };
+        FieldError: {
+            /** @example name */
+            field: string;
+            /** @example must not be blank */
+            message: string;
+            /** @example  */
+            rejectedValue?: string | null;
+        };
     };
-    ErrorResponse: {
-      /** @example INTERNAL_ERROR */
-      code: string;
-      /** @example Unexpected error */
-      message: string;
-      /** @example 2b6b8b22-9b31-4c96-8a22-f6a2d2e4c1c4 */
-      traceId: string;
-      details?: components["schemas"]["ErrorDetails"];
-      /**
-       * Format: date-time
-       * @example "2026-02-01T12:34:56.000Z"
-       */
-      timestamp: string;
-      /** @example /api/hello */
-      path: string;
-    };
-    ErrorDetails: {
-      fieldErrors?: components["schemas"]["FieldError"][];
-      [key: string]: unknown;
-    };
-    FieldError: {
-      /** @example name */
-      field: string;
-      /** @example must not be blank */
-      message: string;
-      /** @example */
-      rejectedValue?: string | null;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
-export type external = Record<string, never>;
-
 export interface operations {
-
-  /** Say hello */
-  getHello: {
-    responses: {
-      /** @description A hello message */
-      200: {
-        content: {
-          "application/json": components["schemas"]["HelloResponse"];
+    getHello: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      /** @description Error response */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description A hello message */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HelloResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
-      };
     };
-  };
 }

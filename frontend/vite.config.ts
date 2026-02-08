@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 type CspMode = 'dev' | 'preview';
 
@@ -60,9 +61,20 @@ function buildSecurityHeaders(mode: CspMode): Record<string, string> {
   };
 }
 
+const shouldAnalyzeBundle = process.env.ANALYZE === 'true';
+
 // Proxy API requests to the backend during local development.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    shouldAnalyzeBundle &&
+      visualizer({
+        filename: 'dist/stats.html',
+        gzipSize: true,
+        brotliSize: true,
+        open: false,
+      }),
+  ].filter(Boolean),
   server: {
     headers: buildSecurityHeaders('dev'),
     proxy: API_PROXY,
