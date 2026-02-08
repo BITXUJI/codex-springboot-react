@@ -6,6 +6,7 @@ import com.example.demo.model.ErrorDetails;
 import com.example.demo.model.ErrorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /** Tests for {@link GlobalExceptionHandler} status mappings. */
 class GlobalExceptionHandlerStatusTest {
@@ -195,6 +197,30 @@ class GlobalExceptionHandlerStatusTest {
         final NoHandlerFoundException exception =
                 new NoHandlerFoundException("GET", "/missing", new HttpHeaders());
         final ResponseEntity<ErrorResponse> response = handler.handleNotFound(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Missing static resource handler returns 404.
+     *
+     * <pre>
+     * Theme: Exception mapping
+     * Test view: Missing static resource handler returns 404
+     * Test conditions: NoResourceFoundException is raised
+     * Test result: Response status is NOT_FOUND
+     * </pre>
+     */
+    @Test
+    void handleResourceNotFoundReturnsNotFound() {
+        final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/missing");
+
+        final NoResourceFoundException exception =
+                new NoResourceFoundException(HttpMethod.GET, "/missing", "/missing");
+        final ResponseEntity<ErrorResponse> response =
+                handler.handleResourceNotFound(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }

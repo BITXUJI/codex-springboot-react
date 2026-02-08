@@ -3,6 +3,7 @@ package com.example.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,5 +47,19 @@ class HelloControllerTest {
         assertThat(mockMvc).isNotNull();
         mockMvc.perform(get("/api/hello")).andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"Hello from Spring Boot\"}"));
+    }
+
+    /**
+     * Ensures unknown API paths return a standardized not found payload.
+     *
+     * @throws Exception when the request fails
+     */
+    @Test
+    void returnsNotFoundForUnknownApiPath() throws Exception {
+        assertThat(mockMvc).isNotNull();
+        mockMvc.perform(get("/api/e2e-not-found-example")).andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Not found"))
+                .andExpect(jsonPath("$.path").value("/api/e2e-not-found-example"));
     }
 }

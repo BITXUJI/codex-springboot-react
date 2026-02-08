@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Maps exceptions to the API's standard error payload.
@@ -181,6 +182,43 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(final NoHandlerFoundException exception,
             final HttpServletRequest request) {
+        return buildNotFoundResponse(request);
+    }
+
+    /**
+     * Handles missing resource mappings that Spring exposes as NoResourceFoundException.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Treat unresolved API routes as NOT_FOUND.
+     * 2) Reuse the standardized not-found payload for consistency.
+     * 3) Return HTTP 404 with NOT_FOUND code.
+     * </pre>
+     *
+     * @param exception no resource found exception
+     * @param request current request
+     * @return error response
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(
+            final NoResourceFoundException exception, final HttpServletRequest request) {
+        return buildNotFoundResponse(request);
+    }
+
+    /**
+     * Builds the standard not-found response body.
+     * 
+     * <pre>
+     * Algorithm:
+     * 1) Use HTTP 404 for unresolved routes and resources.
+     * 2) Set API code to NOT_FOUND.
+     * 3) Emit a stable "Not found" message.
+     * </pre>
+     *
+     * @param request current request
+     * @return standardized not-found response
+     */
+    private ResponseEntity<ErrorResponse> buildNotFoundResponse(final HttpServletRequest request) {
         return ErrorResponseFactory.buildResponse(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND.name(),
                 "Not found", null, request);
     }
