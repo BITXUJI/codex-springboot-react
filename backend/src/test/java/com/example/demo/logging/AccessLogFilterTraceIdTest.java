@@ -33,7 +33,7 @@ class AccessLogFilterTraceIdTest {
         final MockHttpServletRequest withTrace = new MockHttpServletRequest(METHOD_GET, PATH_API);
         withTrace.addHeader(TRACE_HEADER, TRACE_VALUE);
 
-        Assertions.assertEquals(TRACE_VALUE, AccessLogFilter.resolveTraceId(withTrace),
+        Assertions.assertEquals(TRACE_VALUE, AccessLogSupport.resolveTraceId(withTrace),
                 "Trace id header should be reused");
     }
 
@@ -52,7 +52,7 @@ class AccessLogFilterTraceIdTest {
         final MockHttpServletRequest withoutTrace =
                 new MockHttpServletRequest(METHOD_GET, PATH_API);
 
-        Assertions.assertNotNull(AccessLogFilter.resolveTraceId(withoutTrace),
+        Assertions.assertNotNull(AccessLogSupport.resolveTraceId(withoutTrace),
                 "Trace id should be generated when missing");
     }
 }

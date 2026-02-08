@@ -144,4 +144,5 @@ class LogSanitizerTest {
         Assertions.assertEquals(body, LogSanitizer.sanitizeBody(body, null),
                 "Null content type should not trigger masking");
     }
+
 }

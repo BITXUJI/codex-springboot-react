@@ -30,8 +30,8 @@ class AccessLogFilterBodyCaptureTest {
      */
     @Test
     void captureBodyEmptyIsNotOmitted() {
-        final AccessLogFilter.BodyCapture emptyCapture =
-                AccessLogFilter.captureBody(new byte[0], CT_TEXT);
+        final AccessLogSupport.BodyCapture emptyCapture =
+                AccessLogSupport.captureBody(new byte[0], CT_TEXT);
 
         Assertions.assertEquals(Boolean.FALSE, emptyCapture.omitted(),
                 "Empty bodies should not be marked omitted");
@@ -50,8 +50,8 @@ class AccessLogFilterBodyCaptureTest {
     @Test
     void captureBodyBinaryIsOmitted() {
         final byte[] binary = {1, 2};
-        final AccessLogFilter.BodyCapture binaryCapture =
-                AccessLogFilter.captureBody(binary, CT_OCTET);
+        final AccessLogSupport.BodyCapture binaryCapture =
+                AccessLogSupport.captureBody(binary, CT_OCTET);
 
         Assertions.assertEquals(Boolean.TRUE, binaryCapture.omitted(),
                 "Binary bodies should be marked omitted");
@@ -70,8 +70,8 @@ class AccessLogFilterBodyCaptureTest {
     @Test
     void captureBodyLongPayloadIsTruncated() {
         final byte[] bigBody = new byte[MAX_CAPTURE + 100];
-        final AccessLogFilter.BodyCapture bigCapture =
-                AccessLogFilter.captureBody(bigBody, CT_TEXT_UTF8);
+        final AccessLogSupport.BodyCapture bigCapture =
+                AccessLogSupport.captureBody(bigBody, CT_TEXT_UTF8);
 
         Assertions.assertEquals(Boolean.TRUE, bigCapture.truncated(),
                 "Large bodies should be truncated");
@@ -90,8 +90,8 @@ class AccessLogFilterBodyCaptureTest {
     @Test
     void captureBodySmallPayloadIsNotTruncated() {
         final byte[] smallBody = "ok".getBytes(StandardCharsets.UTF_8);
-        final AccessLogFilter.BodyCapture smallCapture =
-                AccessLogFilter.captureBody(smallBody, CT_TEXT_UTF8);
+        final AccessLogSupport.BodyCapture smallCapture =
+                AccessLogSupport.captureBody(smallBody, CT_TEXT_UTF8);
 
         Assertions.assertEquals(Boolean.FALSE, smallCapture.truncated(),
                 "Small bodies should not be truncated");
@@ -109,9 +109,29 @@ class AccessLogFilterBodyCaptureTest {
      */
     @Test
     void captureBodyNullPayloadIsNotOmitted() {
-        final AccessLogFilter.BodyCapture nullCapture = AccessLogFilter.captureBody(null, CT_TEXT);
+        final AccessLogSupport.BodyCapture nullCapture =
+                AccessLogSupport.captureBody(null, CT_TEXT);
 
         Assertions.assertEquals(Boolean.FALSE, nullCapture.omitted(),
                 "Null bodies should not be marked omitted");
+    }
+
+    /**
+     * Null content types are omitted for safety.
+     *
+     * <pre>
+     * Theme: Body capture
+     * Test view: Null content types are omitted for safety
+     * Test conditions: Non-empty body with null content type
+     * Test result: Omitted flag is true
+     * </pre>
+     */
+    @Test
+    void captureBodyNullContentTypeIsOmitted() {
+        final byte[] body = "password=secret".getBytes(StandardCharsets.UTF_8);
+        final AccessLogSupport.BodyCapture capture = AccessLogSupport.captureBody(body, null);
+
+        Assertions.assertEquals(Boolean.TRUE, capture.omitted(),
+                "Bodies without content type should be omitted");
     }
 }

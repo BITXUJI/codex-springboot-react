@@ -36,7 +36,7 @@ class AccessLogFilterClientIpTest {
                 + String.format(IP_FORMAT, 70, 0, 0, 1));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 1),
-                AccessLogFilter.resolveClientIp(forwarded), "First forwarded IP should be used");
+                AccessLogSupport.resolveClientIp(forwarded), "First forwarded IP should be used");
     }
 
     /**
@@ -56,7 +56,7 @@ class AccessLogFilterClientIpTest {
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 2));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 2),
-                AccessLogFilter.resolveClientIp(forwarded),
+                AccessLogSupport.resolveClientIp(forwarded),
                 "Forwarded IP should be used when present");
     }
 
@@ -76,7 +76,7 @@ class AccessLogFilterClientIpTest {
         direct.setRemoteAddr(String.format(IP_FORMAT, 10, 0, 0, 2));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 10, 0, 0, 2),
-                AccessLogFilter.resolveClientIp(direct),
+                AccessLogSupport.resolveClientIp(direct),
                 "Remote address should be used when no forwarded header exists");
     }
 
@@ -97,7 +97,7 @@ class AccessLogFilterClientIpTest {
         direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 9));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 198, 51, 100, 10),
-                AccessLogFilter.resolveClientIp(direct),
+                AccessLogSupport.resolveClientIp(direct),
                 "Forwarded header should be ignored for untrusted remote addresses");
     }
 
@@ -117,7 +117,7 @@ class AccessLogFilterClientIpTest {
         direct.setRemoteAddr("invalid host");
         direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 10));
 
-        Assertions.assertEquals("invalid host", AccessLogFilter.resolveClientIp(direct),
+        Assertions.assertEquals("invalid host", AccessLogSupport.resolveClientIp(direct),
                 "Forwarded header should be ignored when remote address is invalid");
     }
 
@@ -137,7 +137,7 @@ class AccessLogFilterClientIpTest {
         direct.setRemoteAddr("");
         direct.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 11));
 
-        Assertions.assertEquals("", AccessLogFilter.resolveClientIp(direct),
+        Assertions.assertEquals("", AccessLogSupport.resolveClientIp(direct),
                 "Forwarded header should be ignored when remote address is blank");
     }
 
@@ -158,7 +158,7 @@ class AccessLogFilterClientIpTest {
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 12));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 12),
-                AccessLogFilter.resolveClientIp(forwarded),
+                AccessLogSupport.resolveClientIp(forwarded),
                 "Forwarded IP should be used for loopback proxy addresses");
     }
 
@@ -179,7 +179,7 @@ class AccessLogFilterClientIpTest {
         forwarded.addHeader(FORWARDED_HEADER, String.format(IP_FORMAT, 203, 0, 113, 13));
 
         Assertions.assertEquals(String.format(IP_FORMAT, 203, 0, 113, 13),
-                AccessLogFilter.resolveClientIp(forwarded),
+                AccessLogSupport.resolveClientIp(forwarded),
                 "Forwarded IP should be used for link-local proxy addresses");
     }
 }

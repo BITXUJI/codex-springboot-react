@@ -143,13 +143,13 @@ class AccessLogFilterFilterTest {
     }
 
     /**
-     * Runtime failures are rethrown.
+     * Runtime failures are wrapped as servlet exceptions.
      *
      * <pre>
      * Theme: Error propagation
-     * Test view: Runtime failures are rethrown
+     * Test view: Runtime failures are wrapped as servlet exceptions
      * Test conditions: Filter chain throws runtime exception
-     * Test result: Runtime exception is propagated
+     * Test result: ServletException is propagated with runtime cause
      * </pre>
      */
     @Test
@@ -158,10 +158,12 @@ class AccessLogFilterFilterTest {
         final MockHttpServletRequest request = new MockHttpServletRequest(METHOD_GET, PATH_API);
         final MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(IllegalStateException.class,
+        final ServletException thrown = Assertions.assertThrows(ServletException.class,
                 () -> filter.doFilterInternal(request, response, (req, res) -> {
                     throw new IllegalStateException("boom");
-                }), "Runtime exceptions should bubble up");
+                }), "Runtime exceptions should be wrapped as ServletException");
+        Assertions.assertInstanceOf(IllegalStateException.class, thrown.getCause(),
+                "ServletException should preserve runtime cause");
     }
 
     /**
@@ -180,12 +182,12 @@ class AccessLogFilterFilterTest {
         final MockHttpServletRequest request = new MockHttpServletRequest(METHOD_GET, PATH_API);
         final MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(IllegalStateException.class,
+        Assertions.assertThrows(ServletException.class,
                 () -> filter.doFilterInternal(request, response, (req, res) -> {
                     throw new IllegalStateException("boom");
-                }), "Runtime exceptions should bubble up");
-        Assertions.assertInstanceOf(ServletException.class, filter.capturedFailure,
-                "Runtime failure should still be represented for logging");
+                }), "Runtime exceptions should be wrapped as servlet exceptions");
+        Assertions.assertInstanceOf(IllegalStateException.class, filter.capturedFailure,
+                "Runtime failure type should be preserved for logging");
     }
 
     /**

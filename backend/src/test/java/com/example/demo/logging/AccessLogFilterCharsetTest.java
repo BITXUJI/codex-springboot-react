@@ -21,7 +21,7 @@ class AccessLogFilterCharsetTest {
      */
     @Test
     void resolveCharsetNullReturnsUtf8() {
-        Assertions.assertEquals(StandardCharsets.UTF_8, AccessLogFilter.resolveCharset(null),
+        Assertions.assertEquals(StandardCharsets.UTF_8, AccessLogSupport.resolveCharset(null),
                 "Null content types should default to UTF-8");
     }
 
@@ -37,7 +37,7 @@ class AccessLogFilterCharsetTest {
      */
     @Test
     void resolveCharsetWithoutCharsetReturnsUtf8() {
-        Assertions.assertEquals(StandardCharsets.UTF_8, AccessLogFilter.resolveCharset(CT_TEXT),
+        Assertions.assertEquals(StandardCharsets.UTF_8, AccessLogSupport.resolveCharset(CT_TEXT),
                 "Missing charset should default to UTF-8");
     }
 
@@ -54,7 +54,7 @@ class AccessLogFilterCharsetTest {
     @Test
     void resolveCharsetValidReturnsExpectedCharset() {
         Assertions.assertEquals(StandardCharsets.ISO_8859_1,
-                AccessLogFilter.resolveCharset("text/plain; charset=ISO-8859-1"),
+                AccessLogSupport.resolveCharset("text/plain; charset=ISO-8859-1"),
                 "Valid charsets should be returned");
     }
 
@@ -71,7 +71,7 @@ class AccessLogFilterCharsetTest {
     @Test
     void resolveCharsetInvalidReturnsUtf8() {
         Assertions.assertEquals(StandardCharsets.UTF_8,
-                AccessLogFilter.resolveCharset("text/plain; charset=bad-charset"),
+                AccessLogSupport.resolveCharset("text/plain; charset=bad-charset"),
                 "Invalid charset should fall back to UTF-8");
     }
 }

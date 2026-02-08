@@ -42,7 +42,7 @@ class AccessLogFilterHeadersTest {
             }
         };
 
-        final Map<String, String> headers = AccessLogFilter.sanitizeHeaders(noHeaders);
+        final Map<String, String> headers = AccessLogSupport.sanitizeHeaders(noHeaders);
 
         Assertions.assertEquals(0, headers.size(), "Empty header names should yield empty map");
     }
@@ -71,7 +71,7 @@ class AccessLogFilterHeadersTest {
             }
         };
 
-        final Map<String, String> headers = AccessLogFilter.sanitizeHeaders(nullValues);
+        final Map<String, String> headers = AccessLogSupport.sanitizeHeaders(nullValues);
 
         Assertions.assertEquals("", headers.get(HEADER_TEST),
                 "Null header values should be stored as empty strings");
@@ -101,7 +101,7 @@ class AccessLogFilterHeadersTest {
             }
         };
 
-        final Map<String, String> headers = AccessLogFilter.sanitizeHeaders(nullResponse);
+        final Map<String, String> headers = AccessLogSupport.sanitizeHeaders(nullResponse);
 
         Assertions.assertEquals("", headers.get(HEADER_TEST),
                 "Null response header values should be stored as empty strings");

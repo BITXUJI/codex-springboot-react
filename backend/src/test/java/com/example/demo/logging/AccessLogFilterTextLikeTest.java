@@ -27,19 +27,19 @@ class AccessLogFilterTextLikeTest {
     private static final String CT_OCTET = "application/octet-stream";
 
     /**
-     * Null content types are treated as text-like.
+     * Null content types are not treated as text-like.
      *
      * <pre>
      * Theme: Content type detection
-     * Test view: Null content types are treated as text-like
+     * Test view: Null content types are not treated as text-like
      * Test conditions: Null content type
-     * Test result: Text-like returns true
+     * Test result: Text-like returns false
      * </pre>
      */
     @Test
-    void isTextLikeNullReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(null),
-                "Null content types should be considered text-like");
+    void isTextLikeNullReturnsFalse() {
+        Assertions.assertEquals(Boolean.FALSE, AccessLogSupport.isTextLike(null),
+                "Null content types should not be considered text-like");
     }
 
     /**
@@ -54,7 +54,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeTextReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_TEXT),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_TEXT),
                 "text/plain should be considered text-like");
     }
 
@@ -70,7 +70,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeJsonReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_JSON),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_JSON),
                 "application/json should be considered text-like");
     }
 
@@ -86,7 +86,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeJsonVendorReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_JSON_VENDOR),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_JSON_VENDOR),
                 "Vendor JSON content should be considered text-like");
     }
 
@@ -102,7 +102,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeXmlReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_XML),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_XML),
                 "application/xml should be considered text-like");
     }
 
@@ -118,7 +118,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeXmlVendorReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_XML_VENDOR),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_XML_VENDOR),
                 "Vendor XML content should be considered text-like");
     }
 
@@ -134,7 +134,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeFormReturnsTrue() {
-        Assertions.assertEquals(Boolean.TRUE, AccessLogFilter.isTextLike(CT_FORM),
+        Assertions.assertEquals(Boolean.TRUE, AccessLogSupport.isTextLike(CT_FORM),
                 "Form content should be considered text-like");
     }
 
@@ -150,7 +150,7 @@ class AccessLogFilterTextLikeTest {
      */
     @Test
     void isTextLikeBinaryReturnsFalse() {
-        Assertions.assertEquals(Boolean.FALSE, AccessLogFilter.isTextLike(CT_OCTET),
+        Assertions.assertEquals(Boolean.FALSE, AccessLogSupport.isTextLike(CT_OCTET),
                 "Binary content should not be considered text-like");
     }
 }
